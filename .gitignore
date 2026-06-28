@@ -79,6 +79,8 @@ test/
 .codegraph/
 .superpowers/
 .mcp.json
+CLAUDE.md
+docs/superpowers/
 
 # ── Misc ──────────────────────────────────────────────────────────────────────
 *.bak
