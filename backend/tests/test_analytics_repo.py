@@ -1,3 +1,4 @@
+import secrets
 import uuid
 import pytest
 from datetime import datetime, timedelta, timezone
@@ -7,7 +8,6 @@ from app.db.models.jobs import Job
 
 
 async def _create_job(db, name="test-job") -> Job:
-    import secrets
     job = Job(name=name, token=secrets.token_hex(32))
     db.add(job)
     await db.commit()

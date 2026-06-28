@@ -1,4 +1,5 @@
 import base64
+import os
 import time
 
 import pytest
@@ -8,7 +9,10 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
-TEST_DATABASE_URL = "postgresql+asyncpg://notica:changeme@localhost:5432/notica"
+TEST_DATABASE_URL = os.environ.get(
+    "TEST_DATABASE_URL",
+    "postgresql+asyncpg://notica:changeme@localhost:5432/notica",
+)
 
 
 @pytest_asyncio.fixture
