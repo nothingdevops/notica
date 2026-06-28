@@ -1,0 +1,32 @@
+{
+  "realm": "notica",
+  "displayName": "Notica",
+  "enabled": true,
+  "ssoSessionMaxLifespan": 36000,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "clients": [
+    {
+      "clientId": "notica-frontend",
+      "name": "Notica Frontend",
+      "description": "React dashboard — public PKCE client",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["https://your-notica-url/*", "http://localhost:5173/*"],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "credentials": [{"type": "password", "value": "changeme", "temporary": true}]
+    }
+  ]
+}

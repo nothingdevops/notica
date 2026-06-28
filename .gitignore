@@ -1,0 +1,88 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+.pyright/
+
+# ── Node.js / Frontend ────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/build/
+.npm
+.yarn
+
+# ── Environment files ─────────────────────────────────────────────────────────
+# Giữ lại .env.example để làm template, ignore các file thật
+.env
+.env.local
+.env.*.local
+backend/.env
+backend/.env.local
+frontend/.env
+frontend/.env.local
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── OS / Editor ───────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+*.swp
+*.swo
+*~
+
+.idea/
+*.iml
+.vscode/settings.json
+.vscode/launch.json
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+# Không ignore docker-compose.yml và Dockerfile — cần thiết cho deployment
+# Chỉ ignore file override local
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ── Test artifacts (notes tạm thời) ──────────────────────────────────────────
+test/
+
+# ── Claude Code / AI tooling ─────────────────────────────────────────────────
+.claude/
+.codegraph/
+.superpowers/
+.mcp.json
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.bak
+*.tmp
+*.orig
+.cache/
+tmp/

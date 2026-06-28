@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-notica}
+      POSTGRES_USER:     ${POSTGRES_USER:-notica}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notica}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  backend:
+    image: yourregistry/notica/notica-backend:latest  # TODO: đổi thành image thực tế
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-notica}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-notica}
+      APP_ENV:      production
+      LOG_LEVEL:    ${LOG_LEVEL:-info}
+      APP_URL:      ${APP_URL:-http://localhost}
+      DISPLAY_TIMEZONE: ${DISPLAY_TIMEZONE:-Asia/Ho_Chi_Minh}
+      SSO_ENABLED:        ${SSO_ENABLED:-false}
+      KEYCLOAK_URL:       ${KEYCLOAK_URL:-}
+      KEYCLOAK_REALM:     ${KEYCLOAK_REALM:-notica}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-notica-frontend}
+      KEYCLOAK_ISSUER:        ${KEYCLOAK_ISSUER:-}
+      KEYCLOAK_REQUIRED_ROLE: ${KEYCLOAK_REQUIRED_ROLE:-notica-user}
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "127.0.0.1:8000:8000"
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  frontend:
+    image: yourregistry/notica/notica-frontend:latest  # TODO: đổi thành image thực tế
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+volumes:
+  pg_data:
