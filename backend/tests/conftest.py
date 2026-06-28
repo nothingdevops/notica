@@ -2,9 +2,30 @@ import base64
 import time
 
 import pytest
+import pytest_asyncio
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+
+TEST_DATABASE_URL = "postgresql+asyncpg://notica:changeme@localhost:5432/notica"
+
+
+@pytest_asyncio.fixture
+async def db_session():
+    """Async DB session with per-test transaction rollback for isolation."""
+    engine = create_async_engine(TEST_DATABASE_URL, echo=False)
+    async with engine.connect() as conn:
+        trans = await conn.begin()
+        session = AsyncSession(
+            bind=conn,
+            expire_on_commit=False,
+            join_transaction_mode="create_savepoint",
+        )
+        yield session
+        await session.close()
+        await trans.rollback()
+    await engine.dispose()
 
 
 def _int_to_b64url(n: int) -> str:
