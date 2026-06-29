@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Topbar } from '@/components/layout/Topbar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/toast'
 import { useSettings, useUpdateSettings } from '../api'
+import { queryClient } from '@/lib/queryClient'
+import { api } from '@/lib/api'
 
 const TIMEZONE_OPTIONS = [
   { value: 'Asia/Ho_Chi_Minh', label: 'UTC+07 — Asia/Ho_Chi_Minh (Vietnam)' },
@@ -28,25 +30,63 @@ export function SettingsPage() {
   const updateSettings = useUpdateSettings()
   const { toast } = useToast()
 
+  const logoInputRef = useRef<HTMLInputElement>(null)
+  const faviconInputRef = useRef<HTMLInputElement>(null)
+  const [logoUploading, setLogoUploading] = useState(false)
+  const [faviconUploading, setFaviconUploading] = useState(false)
+  const [assetTs, setAssetTs] = useState(() => Date.now())
+
+  async function handleAssetUpload(file: File, type: 'logo' | 'favicon') {
+    const setter = type === 'logo' ? setLogoUploading : setFaviconUploading
+    setter(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      await api.upload(`/assets/${type}`, form)
+      setAssetTs(Date.now())
+      await queryClient.invalidateQueries({ queryKey: ['settings'] })
+      toast(`${type === 'logo' ? 'Logo' : 'Favicon'} updated`, 'success')
+    } catch {
+      toast('Upload failed', 'error')
+    } finally {
+      setter(false)
+    }
+  }
+
+  async function handleAssetDelete(type: 'logo' | 'favicon') {
+    try {
+      await api.delete(`/assets/${type}`)
+      setAssetTs(Date.now())
+      await queryClient.invalidateQueries({ queryKey: ['settings'] })
+      toast(`${type === 'logo' ? 'Logo' : 'Favicon'} removed`, 'success')
+    } catch {
+      toast('Failed to remove', 'error')
+    }
+  }
+
   const [retentionDays, setRetentionDays] = useState<number>(90)
   const [appUrl, setAppUrl] = useState<string>('')
   const [displayTimezone, setDisplayTimezone] = useState<string>('Asia/Ho_Chi_Minh')
+  const [orgName, setOrgName] = useState<string>('Notica')
   const [initialRetention, setInitialRetention] = useState<number>(90)
   const [initialAppUrl, setInitialAppUrl] = useState<string>('')
   const [initialTimezone, setInitialTimezone] = useState<string>('Asia/Ho_Chi_Minh')
+  const [initialOrgName, setInitialOrgName] = useState<string>('Notica')
 
   useEffect(() => {
     if (settings) {
       setRetentionDays(settings.retention_days)
       setAppUrl(settings.app_url)
       setDisplayTimezone(settings.display_timezone)
+      setOrgName(settings.organization_name)
       setInitialRetention(settings.retention_days)
       setInitialAppUrl(settings.app_url)
       setInitialTimezone(settings.display_timezone)
+      setInitialOrgName(settings.organization_name)
     }
   }, [settings])
 
-  const isDirty = retentionDays !== initialRetention || appUrl !== initialAppUrl || displayTimezone !== initialTimezone
+  const isDirty = retentionDays !== initialRetention || appUrl !== initialAppUrl || displayTimezone !== initialTimezone || orgName !== initialOrgName
   const retentionValid = retentionDays >= 1 && retentionDays <= 3650
   const urlValid = appUrl.startsWith('http://') || appUrl.startsWith('https://')
   const canSave = isDirty && retentionValid && urlValid
@@ -56,11 +96,13 @@ export function SettingsPage() {
     if (retentionDays !== initialRetention) update.retention_days = retentionDays
     if (appUrl !== initialAppUrl) update.app_url = appUrl
     if (displayTimezone !== initialTimezone) update.display_timezone = displayTimezone
+    if (orgName !== initialOrgName) update.organization_name = orgName
     updateSettings.mutate(update, {
       onSuccess: () => {
         setInitialRetention(retentionDays)
         setInitialAppUrl(appUrl)
         setInitialTimezone(displayTimezone)
+        setInitialOrgName(orgName)
         toast('Settings saved', 'success')
       },
       onError: () => toast('Failed to save settings', 'error'),
@@ -83,6 +125,119 @@ export function SettingsPage() {
       <Topbar title="Settings" />
       <div className="flex-1 overflow-auto p-5">
         <div className="flex max-w-2xl flex-col gap-5">
+
+          <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
+            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+              Branding
+            </h2>
+            <p className="mb-4 text-[11px] text-[var(--text-3)]">
+              Customize the appearance of your Notica instance.
+            </p>
+
+            <div className="flex flex-col gap-5">
+              {/* Organization name */}
+              <label className="flex flex-col gap-1">
+                <span className="text-xs text-[var(--text-2)]">Organization name</span>
+                <Input
+                  value={orgName}
+                  onChange={e => setOrgName(e.target.value)}
+                  placeholder="Notica"
+                  className="w-64"
+                />
+                <span className="text-[11px] text-[var(--text-3)]">
+                  Shown as sender name in Teams digest cards.
+                </span>
+              </label>
+
+              {/* Logo */}
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-[var(--text-2)]">App logo</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--bg-elevated)]">
+                    {settings?.has_logo ? (
+                      <img src={`/api/v1/assets/logo?t=${assetTs}`} alt="logo" className="h-8 w-8 rounded object-contain" />
+                    ) : (
+                      <span className="text-base">⚡</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/svg+xml"
+                      className="hidden"
+                      onChange={e => {
+                        const f = e.target.files?.[0]
+                        if (f) handleAssetUpload(f, 'logo')
+                        e.target.value = ''
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => logoInputRef.current?.click()}
+                      disabled={logoUploading}
+                    >
+                      {logoUploading ? 'Uploading…' : settings?.has_logo ? 'Replace logo' : 'Upload logo'}
+                    </Button>
+                    {settings?.has_logo && (
+                      <button
+                        onClick={() => handleAssetDelete('logo')}
+                        className="text-[11px] text-[var(--failure)] hover:underline text-left"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <span className="text-[11px] text-[var(--text-3)]">PNG, JPG, or SVG · max 500 KB · Replaces the ⚡ icon in the sidebar.</span>
+              </div>
+
+              {/* Favicon */}
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-[var(--text-2)]">Favicon</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded border border-dashed border-[var(--border)] bg-[var(--bg-elevated)]">
+                    {settings?.has_favicon ? (
+                      <img src={`/api/v1/assets/favicon?t=${assetTs}`} alt="favicon" className="h-5 w-5 object-contain" />
+                    ) : (
+                      <span className="text-[9px] text-[var(--text-3)]">none</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <input
+                      ref={faviconInputRef}
+                      type="file"
+                      accept="image/png,image/x-icon,image/svg+xml"
+                      className="hidden"
+                      onChange={e => {
+                        const f = e.target.files?.[0]
+                        if (f) handleAssetUpload(f, 'favicon')
+                        e.target.value = ''
+                      }}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => faviconInputRef.current?.click()}
+                      disabled={faviconUploading}
+                    >
+                      {faviconUploading ? 'Uploading…' : settings?.has_favicon ? 'Replace favicon' : 'Upload favicon'}
+                    </Button>
+                    {settings?.has_favicon && (
+                      <button
+                        onClick={() => handleAssetDelete('favicon')}
+                        className="text-[11px] text-[var(--failure)] hover:underline text-left"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <span className="text-[11px] text-[var(--text-3)]">PNG, ICO, or SVG · max 50 KB · Shown as browser tab icon.</span>
+              </div>
+            </div>
+          </section>
 
           <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
             <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
@@ -167,6 +322,7 @@ export function SettingsPage() {
                   setRetentionDays(initialRetention)
                   setAppUrl(initialAppUrl)
                   setDisplayTimezone(initialTimezone)
+                  setOrgName(initialOrgName)
                 }}
               >
                 Discard

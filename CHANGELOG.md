@@ -9,19 +9,58 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.2.0] — 2026-06-29
+
+### Fixed
+
+- **Overdue detection sai timezone** — `_is_overdue()` dùng `croniter` với UTC thay vì timezone của instance. Fix: dùng `ZoneInfo(tz_str)` từ `display_timezone` setting.
+- **APScheduler CronTrigger sai timezone** — `CronTrigger` cứng `UTC` → digest fire sai giờ. Fix: load `display_timezone` từ settings lúc app start, truyền vào `CronTrigger(timezone=tz)`.
+- **Idempotency block scheduled fire sau Run Now** — Run Now ghi `status="success"` → scheduled fire bị skip. Fix: Run Now ghi `status="forced"`, `get_last_success` chỉ xét `"success"` → scheduled cursor không bị ảnh hưởng.
+- **Digest window overlap** — Run Now tính `window_start` từ `get_last_execution` → alerts đã gửi bị gom lại. Fix: cả hai trigger đều dùng `get_last_success` cho window cursor; Run Now là "preview" không advance cursor.
+
 ### Added
-- Structured JSON logging trên backend — mọi log ra stdout dạng JSON với `timestamp`, `level`, `logger`, `request_id`
-- `X-Request-ID` middleware — mỗi HTTP request có ID để trace từ nginx → backend log
-- Nginx access log dạng JSON — bao gồm `upstream_response_time`, `request_id`, `status`
-- Gzip compression cho static assets trên nginx
-- Long-cache headers cho JS/CSS/assets (`Cache-Control: public, immutable`, 1 năm)
-- Docker log rotation — `json-file` driver, 50MB per file, giữ 5 files
-- `PYTHONDONTWRITEBYTECODE` + `PYTHONUNBUFFERED` trong Docker image
-- React `ErrorBoundary` — fallback UI khi app crash thay vì blank screen
-- Production build tự động xóa `console.log/debug/info/warn` qua esbuild
+
+- **`schedule_executions.status` mở rộng** — `success` (scheduled fire), `forced` (Run Now), `failure`.
+- **`ScheduleRepository.get_last_execution()`** — execution gần nhất bất kỳ status, dùng cho display.
+- **`ScheduleRepository.get_last_success()`** — chỉ `status="success"`, dùng cho idempotency + window cursor.
+- **Setting `organization_name`** — tên tổ chức, mặc định `"Notica"`, lưu DB. Hiển thị trong Sidebar và Teams cards.
+- **Settings response** — thêm `has_logo: bool`, `has_favicon: bool`.
+- **Assets API** — logo/favicon lưu base64 trong settings table:
+  - `POST /api/v1/assets/logo` — PNG/JPG/SVG, max 500 KB (auth required)
+  - `GET /api/v1/assets/logo` — public, `Cache-Control: public, max-age=3600`
+  - `DELETE /api/v1/assets/logo` — auth required
+  - Tương tự `/assets/favicon` — PNG/ICO/SVG, max 50 KB
+- **Adaptive Card** — title `📊 {org_name} · {schedule_name}`, subtitle `· Scheduled Run` / `· Manual Run`, footer `{org_name} · {tz}`.
+- **Schedule card** — timezone label (e.g. `09:00 AM (UTC+7)`), `forced` → "Manual" badge.
+- **Sidebar động** — org name và logo từ settings API; logo thay ⚡ khi có upload.
+- **Dynamic favicon** — `AppLayout` cập nhật `<link rel="icon">` DOM khi `has_favicon` thay đổi.
+- **`api.upload()` method** — multipart POST với Keycloak auth + `response.ok` check, tránh silent fail.
+- **Cache-busting assets** — `?t={timestamp}` sau mỗi upload/delete.
+- **Settings UI — Branding section** — org name, logo upload/preview/remove, favicon upload/preview/remove.
 
 ### Changed
-- `entrypoint.sh` — startup logs có timestamp ISO-8601 và log level
+
+- `DigestService.send_digest()` nhận thêm `force: bool` param.
+- `SettingsUpdate` / `SettingsResponse` thêm `organization_name`, `has_logo`, `has_favicon`.
+
+---
+
+## [0.1.1] — 2026-06-xx
+
+### Added (Observability & Production hardening)
+
+- Structured JSON logging trên backend — stdout dạng JSON với `timestamp`, `level`, `logger`, `request_id`
+- `X-Request-ID` middleware — trace từ nginx → backend log
+- Nginx access log dạng JSON với `upstream_response_time`, `request_id`, `status`
+- Gzip compression và long-cache headers cho JS/CSS/assets (`Cache-Control: public, immutable`, 1 năm)
+- Docker log rotation — `json-file` driver, 50MB per file, giữ 5 files
+- React `ErrorBoundary`, production build drop console logs qua esbuild
+
+### Changed
+
+- `entrypoint.sh` — startup logs có timestamp ISO-8601
 - `vite.config.ts` — mode-aware config để áp dụng esbuild drop chỉ cho production
 
 ---

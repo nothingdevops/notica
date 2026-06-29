@@ -43,6 +43,19 @@ export function formatDuration(sec: number | null): string {
   return s > 0 ? `${m}m ${s}s` : `${m}m`
 }
 
+export function getUtcOffsetLabel(tz: string): string {
+  try {
+    const parts = new Intl.DateTimeFormat('en', {
+      timeZone: tz,
+      timeZoneName: 'shortOffset',
+    }).formatToParts(new Date())
+    const tzName = parts.find(p => p.type === 'timeZoneName')?.value ?? ''
+    return tzName.replace('GMT', 'UTC')
+  } catch {
+    return ''
+  }
+}
+
 export function formatRelative(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
   const mins = Math.floor(diff / 60_000)

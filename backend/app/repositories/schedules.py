@@ -41,12 +41,23 @@ class ScheduleRepository:
         await self.db.commit()
 
     async def get_last_success(self, schedule_id: uuid.UUID) -> ScheduleExecution | None:
+        """Last scheduled (non-forced) success — used for idempotency check."""
         result = await self.db.execute(
             select(ScheduleExecution)
             .where(
                 ScheduleExecution.schedule_id == schedule_id,
                 ScheduleExecution.status == "success",
             )
+            .order_by(ScheduleExecution.fired_at.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_last_execution(self, schedule_id: uuid.UUID) -> ScheduleExecution | None:
+        """Most recent execution of any type — used for display."""
+        result = await self.db.execute(
+            select(ScheduleExecution)
+            .where(ScheduleExecution.schedule_id == schedule_id)
             .order_by(ScheduleExecution.fired_at.desc())
             .limit(1)
         )

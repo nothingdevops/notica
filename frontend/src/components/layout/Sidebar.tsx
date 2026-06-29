@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
 import { api } from '@/lib/api'
 import type { JobListItem } from '@/features/jobs/types'
+import { useSettings } from '@/features/settings/api'
 import { keycloak } from '@/lib/keycloak'
 
 const navItems = [
@@ -20,18 +21,29 @@ export function Sidebar() {
     queryFn:  () => api.get<JobListItem[]>('/jobs'),
     refetchInterval: 30_000,
   })
+  const { data: settings } = useSettings()
 
   const failureCount = jobs.filter(j => j.last_status === 'failure').length
+  const orgName = settings?.organization_name ?? 'Notica'
+  const hasLogo = settings?.has_logo ?? false
 
   return (
     <aside className="flex w-[188px] min-w-[188px] flex-col border-r border-[var(--border)] bg-[var(--bg-card)]">
       {/* Logo */}
       <div className="flex items-center gap-2.5 border-b border-[var(--border-sub)] px-4 py-3.5">
-        <div className="flex h-[26px] w-[26px] items-center justify-center rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] text-sm">
-          ⚡
-        </div>
+        {hasLogo ? (
+          <img
+            src="/api/v1/assets/logo"
+            alt={orgName}
+            className="h-[26px] w-[26px] rounded-md object-contain"
+          />
+        ) : (
+          <div className="flex h-[26px] w-[26px] items-center justify-center rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] text-sm">
+            ⚡
+          </div>
+        )}
         <div>
-          <div className="text-[13px] font-semibold text-[var(--text-1)]">Notica</div>
+          <div className="text-[13px] font-semibold text-[var(--text-1)]">{orgName}</div>
           <div className="font-mono text-[9px] text-[var(--text-3)]">v0.1.0</div>
         </div>
       </div>

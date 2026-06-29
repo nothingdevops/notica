@@ -37,6 +37,16 @@ export function AppLayout() {
     }
   }, [settings?.display_timezone])
 
+  useEffect(() => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (!link) return
+    if (settings?.has_favicon) {
+      link.href = '/api/v1/assets/favicon'
+    } else {
+      link.href = '/favicon.svg'
+    }
+  }, [settings?.has_favicon])
+
   // 403 = authenticated but missing required Keycloak role
   if (error instanceof ApiError && error.status === 403) {
     return <AccessDenied />

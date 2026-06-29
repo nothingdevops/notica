@@ -21,6 +21,12 @@ async def _get_app_url(db) -> str:
     value = await SettingsRepository(db).get("app_url")
     return str(value) if value is not None else settings.app_url
 
+
+async def _get_org_name(db) -> str:
+    from app.repositories.settings import SettingsRepository
+    value = await SettingsRepository(db).get("organization_name")
+    return str(value) if value is not None else "Notica"
+
 STATUS_EMOJI = {
     "success": "✓",
     "failure": "❌",
@@ -181,15 +187,18 @@ def _build_card(
     app_url: str,
     chunk_info: str = "",
     tz_name: str | None = None,
+    org_name: str = "Notica",
+    force: bool = False,
 ) -> dict:
     sorted_alerts = sorted(alerts, key=lambda a: STATUS_ORDER.get(a.status, 99))
     counts = {s: sum(1 for a in alerts if a.status == s) for s in STATUS_ORDER}
     tz = tz_label(tz_name)
 
-    title = f"📊 Backup Digest · {schedule_name}"
+    title = f"📊 {org_name} · {schedule_name}"
     if chunk_info:
         title += f" {chunk_info}"
-    subtitle = f"{fmt_time(fired_at, '%d %b %Y, %H:%M', tz_name)} {tz} · {len(alerts)} run{'s' if len(alerts) != 1 else ''}"
+    run_type = "Manual Run" if force else "Scheduled Run"
+    subtitle = f"{fmt_time(fired_at, '%d %b %Y, %H:%M', tz_name)} {tz} · {len(alerts)} run{'s' if len(alerts) != 1 else ''} · {run_type}"
 
     header = {
         "type": "Container",
@@ -206,7 +215,7 @@ def _build_card(
         for alert in sorted_alerts:
             body.append(_table_row(alert, app_url, tz_name))
 
-    footer_parts = [f"Notica · {tz}"]
+    footer_parts = [f"{org_name} · {tz}"]
     if next_fire_at:
         footer_parts.append(f"Next: {fmt_time(next_fire_at, '%d/%m %H:%M', tz_name)}")
     body.append({
@@ -233,9 +242,11 @@ def _chunk_alerts(
     next_fire_at: datetime | None,
     app_url: str,
     tz_name: str | None = None,
+    org_name: str = "Notica",
+    force: bool = False,
 ) -> list[dict]:
     """Split alerts into multiple cards if payload exceeds MAX_PAYLOAD_BYTES."""
-    card = _build_card(schedule_name, alerts, fired_at, next_fire_at, app_url, tz_name=tz_name)
+    card = _build_card(schedule_name, alerts, fired_at, next_fire_at, app_url, tz_name=tz_name, org_name=org_name, force=force)
     payload = build_webhook_payload(card)
     if len(json.dumps(payload).encode()) <= MAX_PAYLOAD_BYTES:
         return [payload]
@@ -245,7 +256,7 @@ def _chunk_alerts(
     payloads = []
     for i, chunk in enumerate(chunks, 1):
         info = f"({i}/{len(chunks)})"
-        c = _build_card(schedule_name, chunk, fired_at, next_fire_at if i == len(chunks) else None, app_url, info, tz_name)
+        c = _build_card(schedule_name, chunk, fired_at, next_fire_at if i == len(chunks) else None, app_url, info, tz_name, org_name, force)
         payloads.append(build_webhook_payload(c))
     return payloads
 
@@ -257,6 +268,7 @@ class DigestService:
         alerts: list[Alert],
         fired_at: datetime,
         next_fire_at: datetime | None,
+        force: bool = False,
     ) -> tuple[int, int]:
         """Send digest to all contacts. Returns (sent, failed) counts."""
         import asyncio
@@ -265,13 +277,14 @@ class DigestService:
             contacts = await ContactRepository(db).get_by_ids(list(schedule.contacts))
             app_url = await _get_app_url(db)
             tz_name = await get_tz_name_from_db(db)
+            org_name = await _get_org_name(db)
 
         if not contacts:
             logger.warning("digest: no active contacts for schedule=%s", schedule.name)
             return 0, 0
 
         payloads = _chunk_alerts(
-            alerts, schedule.name, fired_at, next_fire_at, app_url, tz_name
+            alerts, schedule.name, fired_at, next_fire_at, app_url, tz_name, org_name, force
         )
 
         sent = failed = 0

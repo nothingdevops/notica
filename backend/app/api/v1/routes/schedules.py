@@ -18,7 +18,7 @@ router = APIRouter(prefix="/schedules", tags=["schedules"])
 
 async def _enrich(schedule: Schedule, db: AsyncSession) -> ScheduleResponse:
     repo = ScheduleRepository(db)
-    last = await repo.get_last_success(schedule.id)
+    last = await repo.get_last_execution(schedule.id)
     resp = ScheduleResponse.model_validate(schedule)
     if last:
         resp.last_fired_at = last.fired_at

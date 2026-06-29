@@ -15,6 +15,7 @@ DEFAULTS = {
     "retention_days": 90,
     "app_url": config.app_url,
     "display_timezone": "Asia/Ho_Chi_Minh",
+    "organization_name": "Notica",
 }
 
 
@@ -24,6 +25,9 @@ async def _load(db: AsyncSession) -> SettingsResponse:
         retention_days=int(stored.get("retention_days", DEFAULTS["retention_days"])),
         app_url=str(stored.get("app_url", DEFAULTS["app_url"])),
         display_timezone=str(stored.get("display_timezone", DEFAULTS["display_timezone"])),
+        organization_name=str(stored.get("organization_name", DEFAULTS["organization_name"])),
+        has_logo=bool(stored.get("logo_data")),
+        has_favicon=bool(stored.get("favicon_data")),
     )
 
 
@@ -48,4 +52,6 @@ async def update_settings(
         await repo.set("app_url", data.app_url)
     if data.display_timezone is not None:
         await repo.set("display_timezone", data.display_timezone)
+    if data.organization_name is not None:
+        await repo.set("organization_name", data.organization_name)
     return await _load(db)

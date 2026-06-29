@@ -3,8 +3,8 @@
 Danh sách tính năng tiềm năng để phát triển thêm, hướng tới open-source cho cộng đồng.
 Đây là tài liệu thảo luận — chưa phải kế hoạch triển khai.
 
-**Trạng thái hiện tại (Phase 1–6 ✅):**
-Job Registry · Alert Ingestion API · Dashboard (Job Board + Alert History + Log Viewer) · Immediate Notification (Teams) · Digest Mode · Settings (retention/timezone/app_url) · SSO Keycloak · Role-based Access Control
+**Trạng thái hiện tại (Phase 1–6 ✅, v0.2.0 ✅):**
+Job Registry · Alert Ingestion API · Dashboard (Job Board + Alert History + Log Viewer) · Immediate Notification (Teams) · Digest Mode · Settings (retention/timezone/app_url/org_name/logo/favicon) · SSO Keycloak · Branding (logo/favicon) · Digest cursor model · Timezone-aware overdue detection
 
 ---
 

@@ -7,7 +7,7 @@ import cronstrue from 'cronstrue'
 import { useUpdateSchedule, useDeleteSchedule, useRunNow } from '../api'
 import { ScheduleForm } from './ScheduleForm'
 import type { Schedule, ScheduleCreate } from '../types'
-import { formatTimeShort } from '@/lib/utils'
+import { formatTimeShort, getDisplayTimezone, getUtcOffsetLabel } from '@/lib/utils'
 
 function parseCron(expr: string): string {
   try {
@@ -24,6 +24,7 @@ interface ScheduleCardProps {
 }
 
 export function ScheduleCard({ schedule }: ScheduleCardProps) {
+  const tzLabel = getUtcOffsetLabel(getDisplayTimezone())
   const [editOpen,   setEditOpen]   = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [runState,   setRunState]   = useState<'idle' | 'pending' | 'ok' | 'err'>('idle')
@@ -54,7 +55,7 @@ export function ScheduleCard({ schedule }: ScheduleCardProps) {
     setDeleteOpen(false)
   }
 
-  const statusColor = schedule.last_status === 'success'
+  const statusColor = schedule.last_status === 'success' || schedule.last_status === 'forced'
     ? 'var(--success)'
     : schedule.last_status === 'failure'
     ? 'var(--failure)'
@@ -74,7 +75,9 @@ export function ScheduleCard({ schedule }: ScheduleCardProps) {
               <span className="font-medium text-sm text-[var(--text-1)] truncate">{schedule.name}</span>
             </div>
             <code className="text-[11px] text-[var(--text-3)] font-mono mt-0.5">{schedule.cron_expr}</code>
-            <span className="text-[11px] text-[var(--text-2)]">{parseCron(schedule.cron_expr)}</span>
+            <span className="text-[11px] text-[var(--text-2)]">
+              {parseCron(schedule.cron_expr)}{tzLabel ? ` (${tzLabel})` : ''}
+            </span>
           </div>
 
           <div className="flex items-center gap-1 flex-shrink-0">
@@ -113,7 +116,11 @@ export function ScheduleCard({ schedule }: ScheduleCardProps) {
           <Clock className="w-3 h-3" />
           <span>
             Last: {fmtDate(schedule.last_fired_at)}
-            {schedule.last_status && <span className="ml-1 font-medium uppercase">{schedule.last_status}</span>}
+            {schedule.last_status && (
+              <span className="ml-1 font-medium uppercase">
+                {schedule.last_status === 'forced' ? 'Manual' : schedule.last_status}
+              </span>
+            )}
           </span>
         </div>
 

@@ -9,6 +9,7 @@ class SettingsUpdate(BaseModel):
     retention_days: Optional[int] = None
     app_url: Optional[str] = None
     display_timezone: Optional[str] = None
+    organization_name: Optional[str] = None
 
     @field_validator("retention_days")
     @classmethod
@@ -45,3 +46,6 @@ class SettingsResponse(BaseModel):
     retention_days: int
     app_url: str
     display_timezone: str
+    organization_name: str
+    has_logo: bool = False
+    has_favicon: bool = False

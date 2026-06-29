@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.routes import alerts, contacts, jobs, schedules, settings, sso
+from app.api.v1.routes import alerts, assets, contacts, jobs, schedules, settings, sso
 from app.core.config import settings as config
 from app.core.dependencies import get_db
 from app.core.logging_config import setup_logging
@@ -48,6 +48,7 @@ app.include_router(contacts.router, prefix="/api/v1")
 app.include_router(schedules.router, prefix="/api/v1")
 app.include_router(settings.router, prefix="/api/v1")
 app.include_router(sso.router, prefix="/api/v1")
+app.include_router(assets.router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["system"])

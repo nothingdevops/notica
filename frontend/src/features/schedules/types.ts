@@ -6,7 +6,7 @@ export interface Schedule {
   active: boolean
   created_at: string
   last_fired_at: string | null
-  last_status: 'success' | 'failure' | null
+  last_status: 'success' | 'failure' | 'forced' | null
 }
 
 export interface ScheduleCreate {

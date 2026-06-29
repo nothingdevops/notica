@@ -3,6 +3,7 @@ import cronstrue from 'cronstrue'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useContacts } from '@/features/contacts/api'
+import { getDisplayTimezone, getUtcOffsetLabel } from '@/lib/utils'
 import type { Schedule, ScheduleCreate } from '../types'
 
 function parseCronSafe(expr: string): string {
@@ -40,6 +41,7 @@ export function ScheduleForm({ initial, onSubmit, onCancel, isPending }: Schedul
 
   const cronPreview = useMemo(() => parseCronSafe(cronExpr), [cronExpr])
   const cronOk      = useMemo(() => isCronValid(cronExpr), [cronExpr])
+  const tzLabel     = getUtcOffsetLabel(getDisplayTimezone())
 
   function toggleContact(id: string) {
     setSelected(prev =>
@@ -78,7 +80,7 @@ export function ScheduleForm({ initial, onSubmit, onCancel, isPending }: Schedul
           className="text-[11px]"
           style={{ color: cronOk ? 'var(--text-3)' : 'var(--failure)' }}
         >
-          {cronPreview}
+          {cronPreview}{cronOk && tzLabel ? ` (${tzLabel})` : ''}
         </span>
         <div className="mt-1 flex flex-wrap gap-1">
           {[

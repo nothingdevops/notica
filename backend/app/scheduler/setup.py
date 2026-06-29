@@ -12,6 +12,7 @@ from app.repositories.schedules import ScheduleRepository
 logger = logging.getLogger(__name__)
 
 _scheduler: AsyncIOScheduler | None = None
+_scheduler_tz: str = "UTC"
 
 
 def get_scheduler() -> AsyncIOScheduler:
@@ -20,13 +21,18 @@ def get_scheduler() -> AsyncIOScheduler:
 
 
 async def start_scheduler() -> AsyncIOScheduler:
-    global _scheduler
-    _scheduler = AsyncIOScheduler(timezone="UTC")
-    _scheduler.start()
-    logger.info("APScheduler started")
+    global _scheduler, _scheduler_tz
 
     async with async_session() as db:
+        from app.repositories.settings import SettingsRepository
+        stored = await SettingsRepository(db).get_all()
+        _scheduler_tz = str(stored.get("display_timezone") or "Asia/Ho_Chi_Minh")
+
         schedules = await ScheduleRepository(db).get_all(active_only=True)
+
+    _scheduler = AsyncIOScheduler(timezone="UTC")
+    _scheduler.start()
+    logger.info("APScheduler started (cron timezone: %s)", _scheduler_tz)
 
     for s in schedules:
         _register_job(s)
@@ -61,12 +67,15 @@ def _register_job(schedule: Schedule) -> None:
     cron_kwargs = _parse_cron(schedule.cron_expr)
     _scheduler.add_job(
         digest_job,
-        CronTrigger(**cron_kwargs, timezone="UTC"),
+        CronTrigger(**cron_kwargs, timezone=_scheduler_tz),
         id=str(schedule.id),
         args=[schedule.id],
         replace_existing=True,
     )
-    logger.info("Scheduled digest job id=%s name=%s cron=%s", schedule.id, schedule.name, schedule.cron_expr)
+    logger.info(
+        "Scheduled digest job id=%s name=%s cron=%s tz=%s",
+        schedule.id, schedule.name, schedule.cron_expr, _scheduler_tz,
+    )
 
 
 def add_schedule_job(schedule: Schedule) -> None:

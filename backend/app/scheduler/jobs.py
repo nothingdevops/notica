@@ -33,22 +33,21 @@ async def digest_job(schedule_id: uuid.UUID, force: bool = False) -> None:
             return
 
         now = datetime.now(UTC)
-        last = await repo.get_last_success(schedule_id)
+        last_scheduled = await repo.get_last_success(schedule_id)
 
-        # Idempotency: skip if already sent within this cron window (bypass for manual run-now)
+        # Idempotency: skip if a scheduled send already happened within this cron window.
+        # Uses only "success" records so Run Now (stored as "forced") never blocks scheduled fires.
         interval = _estimate_interval(schedule.cron_expr)
-        if not force and last and (now - last.fired_at) < interval * 0.9:
+        if not force and last_scheduled and (now - last_scheduled.fired_at) < interval * 0.9:
             logger.info(
                 "digest_job: idempotency skip schedule=%s last_fired=%s",
-                schedule.name, last.fired_at,
+                schedule.name, last_scheduled.fired_at,
             )
             return
 
-        # For force run-now: extend window back one interval to catch recent alerts
-        if force and last and (now - last.fired_at) < interval * 0.9:
-            window_start = last.fired_at - interval
-        else:
-            window_start = last.fired_at if last else (now - timedelta(hours=24))
+        # Window always starts from last scheduled success — Run Now is a preview of the
+        # same window and does not advance the scheduled cursor.
+        window_start = last_scheduled.fired_at if last_scheduled else (now - timedelta(hours=24))
         logger.info(
             "digest_job: window [%s → %s] schedule=%s",
             window_start, now, schedule.name,
@@ -69,8 +68,8 @@ async def digest_job(schedule_id: uuid.UUID, force: bool = False) -> None:
 
     status = "failure"
     try:
-        await DigestService().send_digest(schedule, alerts, now, next_fire)
-        status = "success"
+        await DigestService().send_digest(schedule, alerts, now, next_fire, force=force)
+        status = "forced" if force else "success"
     except Exception:
         logger.exception("digest_job: send failed schedule=%s", schedule.name)
 

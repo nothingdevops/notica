@@ -1,6 +1,6 @@
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,4 +29,8 @@ class SettingsRepository:
             set_={"value": stmt.excluded.value},
         )
         await self.db.execute(stmt)
+        await self.db.commit()
+
+    async def delete(self, key: str) -> None:
+        await self.db.execute(delete(Setting).where(Setting.key == key))
         await self.db.commit()

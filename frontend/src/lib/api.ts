@@ -44,6 +44,20 @@ export const api = {
   put:    <T>(path: string, body: unknown) =>
     request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
   delete: (path: string) => request<void>(path, { method: 'DELETE' }),
+
+  // Multipart file upload — no Content-Type header so browser sets it with boundary
+  upload: async (path: string, body: FormData): Promise<void> => {
+    const headers: Record<string, string> = {}
+    if (keycloak) {
+      try { await keycloak.updateToken(30) } catch { keycloak.login(); throw new ApiError(401, 'Session expired') }
+      headers['Authorization'] = `Bearer ${keycloak.token}`
+    }
+    const res = await fetch(`${BASE}${path}`, { method: 'POST', body, headers })
+    if (!res.ok) {
+      const text = await res.text().catch(() => res.statusText)
+      throw new ApiError(res.status, text)
+    }
+  },
 }
 
 export { ApiError }
