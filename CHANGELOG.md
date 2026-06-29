@@ -39,6 +39,25 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`api.upload()` method** — multipart POST với Keycloak auth + `response.ok` check, tránh silent fail.
 - **Cache-busting assets** — `?t={timestamp}` sau mỗi upload/delete.
 - **Settings UI — Branding section** — org name, logo upload/preview/remove, favicon upload/preview/remove.
+- **Analytics Dashboard** (`/analytics`) — trang tổng quan hệ thống với Progressive Disclosure design:
+  - KPI strip: Success Rate, Total Jobs, Failing Now, Alerts (Nd), Avg Duration
+  - Health by Environment — 4 cards (prod/staging/dev/dr/other) với progress bar và sparkline 7-bar
+  - Problem Jobs table — chỉ hiện jobs có failure, mini heatmap 7-ô, click → Job Detail
+  - Healthy Jobs row — collapsed by default, "Expand all" để xem danh sách, click từng job → Job Detail
+  - Alert Volume stacked bar chart + Avg Duration Trend line chart
+  - Period selector 7d / 30d / 90d — thay đổi toàn bộ data trên trang
+- **Per-job analytics panel** (`JobStatsPanel`) nhúng vào Job Detail page — success rate, total runs, daily status bar chart, duration trend line chart
+- `GET /api/v1/analytics/overview?period=N` — system-wide KPIs + env health + problem/healthy jobs + daily charts
+- `GET /api/v1/analytics/jobs/{id}?period=N` — per-job stats (7/30/90 days)
+- Structured JSON logging trên backend — mọi log ra stdout dạng JSON với `timestamp`, `level`, `logger`, `request_id`
+- `X-Request-ID` middleware — mỗi HTTP request có ID để trace từ nginx → backend log
+- Nginx access log dạng JSON — bao gồm `upstream_response_time`, `request_id`, `status`
+- Gzip compression cho static assets trên nginx
+- Long-cache headers cho JS/CSS/assets (`Cache-Control: public, immutable`, 1 năm)
+- Docker log rotation — `json-file` driver, 50MB per file, giữ 5 files
+- `PYTHONDONTWRITEBYTECODE` + `PYTHONUNBUFFERED` trong Docker image
+- React `ErrorBoundary` — fallback UI khi app crash thay vì blank screen
+- Production build tự động xóa `console.log/debug/info/warn` qua esbuild
 
 ### Changed
 

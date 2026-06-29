@@ -26,6 +26,7 @@ Notica gửi báo cáo tổng hợp theo lịch cron (hàng ngày/tuần) liệt
 ### Dashboard
 - **Job Board**: tổng quan trạng thái tất cả jobs, 7 lần chạy gần nhất, highlight jobs đang overdue
 - **Alert History**: tìm kiếm theo job, status, thẻ tag, khoảng thời gian; xem log đầy đủ trong drawer
+- **Analytics**: success rate, health by environment, problem jobs table, alert volume chart, duration trend — period selector 7d/30d/90d
 - **Schedule Manager**: quản lý lịch gửi digest với cron expression và xem trước human-readable
 - **Contact Manager**: quản lý danh sách Teams webhook, test kết nối
 - **Settings**: cấu hình thời gian lưu trữ alert và URL ứng dụng

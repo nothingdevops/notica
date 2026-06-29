@@ -146,7 +146,7 @@ export function JobDetailPage() {
 
             {/* Section 1 — Job Info */}
             <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-              <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
                 Job Info
               </h2>
               <div className="flex flex-col gap-3">
@@ -238,7 +238,7 @@ export function JobDetailPage() {
 
             {/* Section 2 — Token */}
             <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-              <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+              <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
                 Alert Token
               </h2>
               <p className="mb-4 text-[11px] text-[var(--text-3)]">
@@ -272,7 +272,7 @@ export function JobDetailPage() {
 
             {/* Section 3 — Immediate Alerts */}
             <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-              <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+              <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
                 Immediate Alerts
               </h2>
               <p className="mb-4 text-[11px] text-[var(--text-3)]">
@@ -338,6 +338,8 @@ export function JobDetailPage() {
               </div>
             </section>
 
+            {/* Section 4 — Health Analytics */}
+            <JobStatsPanel jobId={id!} />
             {/* Section 4 — Danger Zone */}
             <section className="border-l-[3px] border-red-500 rounded-r-lg bg-[var(--bg-card)] px-4 py-4">
               <p className="mb-1 text-[11px] font-semibold text-red-500">Delete this job</p>

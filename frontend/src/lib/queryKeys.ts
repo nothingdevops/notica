@@ -9,4 +9,9 @@ export const queryKeys = {
     list:   (filters: object) => [...queryKeys.alerts.all, 'list', filters] as const,
     detail: (id: string) => [...queryKeys.alerts.all, id] as const,
   },
+  analytics: {
+    all:      ['analytics'] as const,
+    overview: (period: number) => [...queryKeys.analytics.all, 'overview', period] as const,
+    job:      (id: string, period: number) => [...queryKeys.analytics.all, 'job', id, period] as const,
+  },
 }

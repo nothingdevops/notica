@@ -5,6 +5,8 @@ Danh sách tính năng tiềm năng để phát triển thêm, hướng tới op
 
 **Trạng thái hiện tại (Phase 1–6 ✅, v0.2.0 ✅):**
 Job Registry · Alert Ingestion API · Dashboard (Job Board + Alert History + Log Viewer) · Immediate Notification (Teams) · Digest Mode · Settings (retention/timezone/app_url/org_name/logo/favicon) · SSO Keycloak · Branding (logo/favicon) · Digest cursor model · Timezone-aware overdue detection
+**Trạng thái hiện tại (Phase 1–6 + C1 ✅):**
+Job Registry · Alert Ingestion API · Dashboard (Job Board + Alert History + Log Viewer) · Immediate Notification (Teams) · Digest Mode · Settings (retention/timezone/app_url) · SSO Keycloak · Role-based Access Control · Analytics Dashboard (C1)
 
 ---
 
@@ -140,12 +142,15 @@ Route alert đến contact khác nhau dựa trên job tags, thay vì config cứ
 
 > Biến Notica từ alert tool thành monitoring platform có chiều sâu.
 
-### C1 · Job Health Dashboard
+### C1 · Job Health Dashboard ✅ *Implemented*
 
-Charts và statistics — hiện tại chỉ có danh sách alert thô, không có trending.
+Charts và statistics — system-wide overview và per-job analytics.
 
-**Use-case:**
-> Manager muốn biết tổng quan sức khỏe backup hệ thống trong tháng: bao nhiêu % thành công, job nào fail nhiều nhất, xu hướng duration có tăng không (cảnh báo backup ngày càng chậm vì data lớn). Hiện tại phải export CSV và tự tính — với dashboard có chart ngay trong Notica UI.
+**Đã implement:**
+- `/analytics` trang với Progressive Disclosure design: KPI strip → Env Health cards → Problem Jobs table → Healthy Jobs collapse → Alert Volume + Duration charts
+- Period selector 7d / 30d / 90d thay đổi toàn bộ data
+- Per-job `JobStatsPanel` nhúng vào Job Detail page
+- Backend: `GET /analytics/overview?period=N` + `GET /analytics/jobs/{id}?period=N`
 
 ---
 
@@ -712,7 +717,7 @@ Phase 8  ── A2 Alert Acknowledgment + A3 Maintenance Windows + F3 Runbook Li
 Phase 9  ── B1 Email + B2 Slack + B3 Generic Webhook + B4 Telegram
              (mở kênh thông báo → tăng adoption)
 
-Phase 10 ── C1 Job Health Dashboard + D1 Prometheus Metrics + H3 Health Score
+Phase 10 ── C1 ✅ (done) + D1 Prometheus Metrics + H3 Health Score
              (visibility + Grafana integration)
 
 Phase 11 ── E1 Heartbeat + E3 Anomaly Detection + G2 Custom Rules
