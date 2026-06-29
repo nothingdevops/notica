@@ -9,8 +9,7 @@ import { Dialog, DialogFooter } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/components/ui/toast'
 import { useContacts } from '@/features/contacts/api'
-import { JobStatsPanel } from '@/features/analytics/components/JobStatsPanel'
-import { useJob, useUpdateJob, useRegenerateToken } from '../api'
+import { useJob, useUpdateJob, useRegenerateToken, useDeleteJob } from '../api'
 import type { JobUpdate } from '../types'
 
 const IMMEDIATE_OPTIONS = [
@@ -31,9 +30,11 @@ export function JobDetailPage() {
   const { data: contacts = [] } = useContacts()
   const updateJob = useUpdateJob(id!)
   const regenerateToken = useRegenerateToken(id!)
+  const deleteJob = useDeleteJob(id!)
 
   const [showToken, setShowToken] = useState(false)
   const [confirmRegen, setConfirmRegen] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const [form, setForm] = useState<Partial<JobUpdate>>({})
 
@@ -57,6 +58,16 @@ export function JobDetailPage() {
     regenerateToken.mutate(undefined, {
       onSuccess: () => { setConfirmRegen(false); toast('Token regenerated', 'success') },
       onError:   () => toast('Failed to regenerate token', 'error'),
+    })
+  }
+
+  function handleDelete() {
+    deleteJob.mutate(undefined, {
+      onSuccess: () => {
+        navigate('/')
+        toast('Job deleted', 'success')
+      },
+      onError: () => toast('Failed to delete job', 'error'),
     })
   }
 
@@ -329,6 +340,21 @@ export function JobDetailPage() {
 
             {/* Section 4 — Health Analytics */}
             <JobStatsPanel jobId={id!} />
+            {/* Section 4 — Danger Zone */}
+            <section className="border-l-[3px] border-red-500 rounded-r-lg bg-[var(--bg-card)] px-4 py-4">
+              <p className="mb-1 text-[11px] font-semibold text-red-500">Delete this job</p>
+              <p className="mb-3 text-[11px] leading-relaxed text-[var(--text-3)]">
+                Permanently removes this job and all associated alerts. This action cannot be undone.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-red-500 text-red-500 hover:bg-red-500/10 hover:text-red-400"
+                onClick={() => setConfirmDelete(true)}
+              >
+                Delete job
+              </Button>
+            </section>
 
             {/* Save */}
             {isDirty && (
@@ -349,6 +375,28 @@ export function JobDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete confirm dialog */}
+      <Dialog
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        title={`Delete "${job.name}"?`}
+        description="This will permanently delete the job and all its alerts. This action cannot be undone."
+      >
+        <DialogFooter>
+          <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDelete}
+            disabled={deleteJob.isPending}
+          >
+            {deleteJob.isPending ? 'Deleting…' : 'Delete'}
+          </Button>
+        </DialogFooter>
+      </Dialog>
 
       {/* Regenerate confirm dialog */}
       <Dialog
