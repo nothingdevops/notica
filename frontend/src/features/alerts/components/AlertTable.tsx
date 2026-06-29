@@ -117,7 +117,7 @@ export function AlertTable({
                 {hg.headers.map(header => (
                   <th
                     key={header.id}
-                    className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]"
+                    className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)]"
                     style={{ width: header.column.columnDef.size }}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}

@@ -4,17 +4,17 @@
 
 :root,
 [data-theme='dark'] {
-  --bg-base: #0c0e14;
-  --bg-card: #111318;
-  --bg-elevated: #181b22;
-  --bg-hover: #1c1f2a;
-  --border: #1f2230;
-  --border-sub: #161924;
-  --text-1: #e8eaf0;
-  --text-2: #8892a4;
-  --text-3: #454e61;
+  --bg-base: #111111;
+  --bg-card: #1a1a1a;
+  --bg-elevated: #222222;
+  --bg-hover: #272727;
+  --border: #2e2e2e;
+  --border-sub: #252525;
+  --text-1: #f5f5f5;
+  --text-2: #bebebe;
+  --text-3: #8a8a8a;
   --accent: #818cf8;
-  --accent-bg: rgba(129, 140, 248, 0.08);
+  --accent-bg: rgba(129, 140, 248, 0.1);
   --success: #22c55e;
   --failure: #ef4444;
   --warning: #f59e0b;

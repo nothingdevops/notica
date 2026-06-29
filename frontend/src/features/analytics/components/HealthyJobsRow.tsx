@@ -7,7 +7,7 @@ const ENV_BADGE: Record<string, string> = {
   staging: 'bg-amber-900/20 text-amber-400 border border-amber-800/30',
   dev:     'bg-blue-900/20 text-blue-400 border border-blue-800/30',
   dr:      'bg-green-900/20 text-green-400 border border-green-800/30',
-  other:   'bg-zinc-800/30 text-zinc-400 border border-zinc-700/30',
+  other:   'bg-violet-900/30 text-violet-400 border border-violet-700/40',
 }
 
 interface Props {

@@ -31,7 +31,7 @@ export function EnvHealthGrid({ envHealth, loading }: Props) {
   if (loading) {
     return (
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)] mb-3">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-3">
           Health by Environment
         </p>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -56,7 +56,7 @@ export function EnvHealthGrid({ envHealth, loading }: Props) {
 
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)] mb-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-3">
         Health by Environment
       </p>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

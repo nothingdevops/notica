@@ -36,7 +36,7 @@ interface KpiCellProps {
 function KpiCell({ label, loading, children, last }: KpiCellProps) {
   return (
     <div className={`px-6 py-4 ${last ? '' : 'border-r border-[var(--border)]'}`}>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)] mb-2">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-2">
         {label}
       </p>
       {loading ? (
@@ -176,7 +176,7 @@ export function AnalyticsPage() {
       </div>
 
       {/* ── Scrollable body ── */}
-      <div className="flex-1 overflow-y-auto p-7 flex flex-col gap-4">
+      <div className="flex-1 overflow-y-auto p-7 space-y-4">
 
         {/* Health by Environment */}
         <EnvHealthGrid envHealth={data?.env_health ?? []} loading={isLoading} />

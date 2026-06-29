@@ -35,7 +35,7 @@ export function StatusBarChart({ data, title, height = 180 }: Props) {
   return (
     <div>
       {title && (
-        <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-2)]">
           {title}
         </p>
       )}

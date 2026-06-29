@@ -20,7 +20,7 @@ function successRateColor(rate: number): string {
 function SectionDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)]">
         {label}
       </span>
       <div className="flex-1 border-t border-[var(--border)]" />
@@ -36,7 +36,7 @@ export function JobStatsPanel({ jobId }: Props) {
     <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-sm">
       {/* Header row */}
       <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
           Health Analytics
         </h2>
 
@@ -68,7 +68,7 @@ export function JobStatsPanel({ jobId }: Props) {
       {/* Summary stats */}
       <div className="mb-5 grid grid-cols-2 gap-4">
         <div className="rounded-lg bg-[var(--bg-elevated)] px-4 py-3">
-          <p className="mb-1 text-[10px] uppercase tracking-wider text-[var(--text-3)]">
+          <p className="mb-1 text-[10px] uppercase tracking-wider text-[var(--text-2)]">
             Success rate
           </p>
           {isLoading ? (
@@ -84,7 +84,7 @@ export function JobStatsPanel({ jobId }: Props) {
         </div>
 
         <div className="rounded-lg bg-[var(--bg-elevated)] px-4 py-3">
-          <p className="mb-1 text-[10px] uppercase tracking-wider text-[var(--text-3)]">
+          <p className="mb-1 text-[10px] uppercase tracking-wider text-[var(--text-2)]">
             Total runs
           </p>
           {isLoading ? (

@@ -33,7 +33,7 @@ export function DurationLineChart({ data, title, height = 180 }: Props) {
     .map(d => ({ day: fmtDay(d.day), duration: d.avg_duration }))
 
   const titleEl = title ? (
-    <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
+    <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-2)]">
       {title}
     </p>
   ) : null

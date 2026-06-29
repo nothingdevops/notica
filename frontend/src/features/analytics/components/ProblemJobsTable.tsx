@@ -13,7 +13,7 @@ const ENV_BADGE: Record<string, string> = {
   staging: 'bg-amber-900/20 text-amber-400 border border-amber-800/30',
   dev:     'bg-blue-900/20 text-blue-400 border border-blue-800/30',
   dr:      'bg-green-900/20 text-green-400 border border-green-800/30',
-  other:   'bg-zinc-800/30 text-zinc-400 border border-zinc-700/30',
+  other:   'bg-violet-900/30 text-violet-400 border border-violet-700/40',
 }
 
 function successRateColor(rate: number): string {
@@ -87,19 +87,19 @@ export function ProblemJobsTable({ jobs, loading, onJobClick }: Props) {
       <table className="w-full text-xs">
         <thead>
           <tr className="border-t border-[var(--border)]">
-            <th className="text-left px-5 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
+            <th className="text-left px-5 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Job
             </th>
-            <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
+            <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Rate (7d)
             </th>
-            <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
+            <th className="text-right px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Failures
             </th>
-            <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
+            <th className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Trend
             </th>
-            <th className="text-right px-5 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">
+            <th className="text-right px-5 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Last run
             </th>
           </tr>

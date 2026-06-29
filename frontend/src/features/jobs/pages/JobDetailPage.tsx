@@ -135,7 +135,7 @@ export function JobDetailPage() {
 
             {/* Section 1 — Job Info */}
             <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-              <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
                 Job Info
               </h2>
               <div className="flex flex-col gap-3">
@@ -227,7 +227,7 @@ export function JobDetailPage() {
 
             {/* Section 2 — Token */}
             <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-              <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+              <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
                 Alert Token
               </h2>
               <p className="mb-4 text-[11px] text-[var(--text-3)]">
@@ -261,7 +261,7 @@ export function JobDetailPage() {
 
             {/* Section 3 — Immediate Alerts */}
             <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-              <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+              <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
                 Immediate Alerts
               </h2>
               <p className="mb-4 text-[11px] text-[var(--text-3)]">

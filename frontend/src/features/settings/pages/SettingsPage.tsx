@@ -127,7 +127,7 @@ export function SettingsPage() {
         <div className="flex max-w-2xl flex-col gap-5">
 
           <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Branding
             </h2>
             <p className="mb-4 text-[11px] text-[var(--text-3)]">
@@ -240,7 +240,7 @@ export function SettingsPage() {
           </section>
 
           <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Display
             </h2>
             <p className="mb-4 text-[11px] text-[var(--text-3)]">
@@ -267,7 +267,7 @@ export function SettingsPage() {
           </section>
 
           <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Data Retention
             </h2>
             <p className="mb-4 text-[11px] text-[var(--text-3)]">
@@ -292,7 +292,7 @@ export function SettingsPage() {
           </section>
 
           <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
-            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-3)]">
+            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Application
             </h2>
             <p className="mb-4 text-[11px] text-[var(--text-3)]">
