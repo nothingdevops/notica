@@ -9,6 +9,23 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Delete Job** — Danger Zone section trong Job Detail page với confirm dialog. `useDeleteJob` mutation hook trong `features/jobs/api.ts`; sau khi xóa redirect về Job Board và hiển thị toast.
+- **`JobStatsPanel` nhúng vào Job Detail** — per-job analytics panel (success rate, daily status bars, duration trend) load ngay trong Job Detail page.
+
+### Changed
+
+- **Dark mode palette — Deep Zinc C** — toàn bộ dark mode CSS vars đã được cập nhật sang bộ màu Deep Zinc với độ sáng chữ cân bằng:
+  - Nền: `--bg-base #111111`, `--bg-card #1a1a1a`, `--bg-elevated #222222`, `--border #2e2e2e`
+  - Chữ: `--text-1 #f5f5f5`, `--text-2 #bebebe`, `--text-3 #8a8a8a` (contrast text-3: 5.2:1 ✅)
+  - Trước đây: navy #0c0e14 với text-3 #454e61 (contrast 2.23:1 ❌)
+- **Section headers dùng `--text-2` thay `--text-3`** — 22 chỗ dùng `uppercase tracking-wider` (Job Info, Alert Token, Immediate Alerts, table column headers, chart labels…) chuyển sang `--text-2 #bebebe` để dễ đọc hơn.
+
+### Fixed
+
+- **Build fail: `JobStatsPanel` chưa import** — `JobDetailPage.tsx` reference `<JobStatsPanel>` nhưng thiếu import statement → `tsc` error khi `make build`.
+
 ---
 
 ## [0.2.0] — 2026-06-29

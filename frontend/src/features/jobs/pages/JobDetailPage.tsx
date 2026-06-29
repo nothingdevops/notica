@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/components/ui/toast'
 import { useContacts } from '@/features/contacts/api'
 import { useJob, useUpdateJob, useRegenerateToken, useDeleteJob } from '../api'
+import { JobStatsPanel } from '@/features/analytics/components/JobStatsPanel'
 import type { JobUpdate } from '../types'
 
 const IMMEDIATE_OPTIONS = [
