@@ -230,6 +230,12 @@ DELETE /api/v1/assets/favicon   -- xóa favicon (auth)
 ```
 
 Assets lưu trong `settings` table dưới dạng base64 (`logo_data`, `logo_mime`, `favicon_data`, `favicon_mime`). Không cần filesystem hay object storage.
+### Analytics
+```
+GET /api/v1/analytics/overview?period=7        -- system-wide: KPIs, env health, problem/healthy jobs, charts
+GET /api/v1/analytics/jobs/{job_id}?period=7   -- per-job: success rate, daily status, duration trend
+```
+`period` nhận giá trị `7`, `30`, hoặc `90` (days). Default `7`.
 
 ---
 
@@ -280,6 +286,7 @@ frontend/src/
   features/
     jobs/           # Job Registry CRUD + Job Board
     alerts/         # Alert History table + Log Viewer drawer
+    analytics/      # Analytics dashboard + JobStatsPanel per-job charts
     schedules/      # Schedule Manager CRUD
     contacts/       # Contact Manager CRUD + Test button
     settings/       # Retention, timezone, branding (org name, logo, favicon)
@@ -290,6 +297,8 @@ frontend/src/
     ui/             # shadcn primitives
   lib/
     api.ts          # fetch wrapper: get/post/put/delete/upload(multipart)
+    api.ts          # fetch wrapper
+    queryKeys.ts    # typed query keys cho TanStack Query
     queryClient.ts
   hooks/
     useDebounce.ts
@@ -304,6 +313,9 @@ frontend/src/
 | Alert History | `/alerts` | Table với date range + status + tag filter, sort, pagination. Row expand → log drawer |
 | Job Detail | `/jobs/{id}` | Config job, xem token, nút Regenerate Token, immediate_on config |
 | Schedules | `/schedules` | CRUD digest schedule, cron input với cronstrue preview, timezone label, Run Now button |
+| Analytics | `/analytics` | KPI strip + Health by Environment cards + Problem Jobs table + charts; period 7d/30d/90d |
+| Job Detail | `/jobs/{id}` | Config job, xem token, nút Regenerate Token, immediate_on config, per-job analytics panel |
+| Schedules | `/schedules` | CRUD digest schedule, cron input với cronstrue preview, manual trigger |
 | Contacts | `/contacts` | CRUD contacts, "Test" button per contact |
 | Settings | `/settings` | Branding (org name, logo, favicon), timezone, retention, app URL |
 
@@ -378,3 +390,4 @@ Access log của nginx cũng dạng JSON, bao gồm `upstream_response_time` và
 | 5 | Settings + Retention + Docker Compose packaging | Production-ready deploy |
 | 6 | SSO Keycloak (hybrid auth), structured logging, ErrorBoundary | Open-source ready |
 | 0.2.0 | Timezone fix (overdue + APScheduler), digest cursor model, org name, assets API, branding UI | Production bugs fixed + branding |
+| C1 | Analytics Dashboard (`/analytics` + JobStatsPanel) | Visibility — success rate, env health, problem jobs, charts 7/30/90d |

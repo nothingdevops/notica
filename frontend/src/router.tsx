@@ -6,19 +6,21 @@ import { AlertHistoryPage }  from '@/features/alerts/pages/AlertHistoryPage'
 import { ContactsPage }      from '@/features/contacts/pages/ContactsPage'
 import { SchedulesPage }     from '@/features/schedules/pages/SchedulesPage'
 import { SettingsPage }      from '@/features/settings/pages/SettingsPage'
+import { AnalyticsPage }     from '@/features/analytics/pages/AnalyticsPage'
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
     children: [
-      { index: true,           element: <JobBoardPage /> },
-      { path: 'jobs/:id',      element: <JobDetailPage /> },
-      { path: 'alerts',            element: <AlertHistoryPage /> },
+      { index: true,              element: <JobBoardPage /> },
+      { path: 'jobs/:id',         element: <JobDetailPage /> },
+      { path: 'alerts',           element: <AlertHistoryPage /> },
       { path: 'alerts/:alertId',  element: <AlertHistoryPage /> },
-      { path: 'schedules',     element: <SchedulesPage /> },
-      { path: 'contacts',      element: <ContactsPage /> },
-      { path: 'settings',      element: <SettingsPage /> },
+      { path: 'schedules',        element: <SchedulesPage /> },
+      { path: 'contacts',         element: <ContactsPage /> },
+      { path: 'settings',         element: <SettingsPage /> },
+      { path: 'analytics',        element: <AnalyticsPage /> },
     ],
   },
 ])

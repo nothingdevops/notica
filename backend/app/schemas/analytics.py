@@ -1,5 +1,6 @@
 from __future__ import annotations
 import uuid
+from datetime import datetime
 from pydantic import BaseModel
 
 
@@ -21,6 +22,30 @@ class TopFailingJob(BaseModel):
     failure_count: int
 
 
+class EnvHealthSparkPoint(BaseModel):
+    day: str          # "YYYY-MM-DD"
+    failure_rate: float   # 0.0..1.0
+
+
+class EnvHealthItem(BaseModel):
+    env: str              # "prod" | "staging" | "dev" | "dr" | "other"
+    total_jobs: int
+    failing_jobs: int     # jobs with ≥1 failure in period
+    success_rate: float   # 0.0..100.0
+    daily_spark: list[EnvHealthSparkPoint]  # 7 points
+
+
+class ProblemJobItem(BaseModel):
+    job_id: uuid.UUID
+    job_name: str
+    env: str              # from tags["env"] or "other"
+    success_rate: float
+    failure_count: int
+    total_runs: int
+    daily_status: list[DailyStatusPoint]   # 7 days for mini heatmap
+    last_alert_at: datetime | None
+
+
 class JobStatsResponse(BaseModel):
     job_id: uuid.UUID
     period_days: int
@@ -30,10 +55,22 @@ class JobStatsResponse(BaseModel):
     daily_duration: list[DailyDurationPoint]
 
 
+class HealthyJobSummary(BaseModel):
+    job_id: uuid.UUID
+    job_name: str
+    env: str
+
+
 class OverviewResponse(BaseModel):
     total_jobs: int
     active_jobs: int
-    success_rate_7d: float     # 0.0–100.0
-    total_alerts_7d: int
-    daily_status: list[DailyStatusPoint]   # 7 ngày, system-wide
-    top_failing_jobs: list[TopFailingJob]  # top 5
+    success_rate: float        # 0.0–100.0 (for requested period)
+    total_alerts: int
+    daily_status: list[DailyStatusPoint]
+    top_failing_jobs: list[TopFailingJob]
+    failing_jobs_count: int
+    healthy_jobs_count: int
+    env_health: list[EnvHealthItem]
+    problem_jobs: list[ProblemJobItem]
+    healthy_jobs: list[HealthyJobSummary]
+    daily_duration: list[DailyDurationPoint]

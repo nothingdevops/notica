@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Bell, Clock, Users, Settings } from 'lucide-react'
+import { LayoutDashboard, Bell, BarChart2, Clock, Users, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/queryKeys'
@@ -9,10 +9,11 @@ import { useSettings } from '@/features/settings/api'
 import { keycloak } from '@/lib/keycloak'
 
 const navItems = [
-  { to: '/',          label: 'Job Board',      icon: LayoutDashboard, end: true },
-  { to: '/alerts',    label: 'Alert History',  icon: Bell },
-  { to: '/schedules', label: 'Schedules',      icon: Clock },
-  { to: '/contacts',  label: 'Contacts',       icon: Users },
+  { to: '/',           label: 'Job Board',      icon: LayoutDashboard, end: true },
+  { to: '/alerts',     label: 'Alert History',  icon: Bell },
+  { to: '/analytics',  label: 'Analytics',      icon: BarChart2 },
+  { to: '/schedules',  label: 'Schedules',      icon: Clock },
+  { to: '/contacts',   label: 'Contacts',       icon: Users },
 ]
 
 export function Sidebar() {

@@ -9,6 +9,7 @@ import { Dialog, DialogFooter } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/components/ui/toast'
 import { useContacts } from '@/features/contacts/api'
+import { JobStatsPanel } from '@/features/analytics/components/JobStatsPanel'
 import { useJob, useUpdateJob, useRegenerateToken } from '../api'
 import type { JobUpdate } from '../types'
 
@@ -325,6 +326,9 @@ export function JobDetailPage() {
                 )}
               </div>
             </section>
+
+            {/* Section 4 — Health Analytics */}
+            <JobStatsPanel jobId={id!} />
 
             {/* Save */}
             {isDirty && (
