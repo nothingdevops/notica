@@ -45,3 +45,12 @@ export function useRegenerateToken(id: string) {
     },
   })
 }
+
+export function useDeleteJob(id: string) {
+  return useMutation({
+    mutationFn: () => api.delete(`/jobs/${id}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobs.all })
+    },
+  })
+}
