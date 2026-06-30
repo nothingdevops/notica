@@ -23,6 +23,8 @@
   --failure-bg: rgba(239, 68, 68, 0.12);
   --warning-bg: rgba(245, 158, 11, 0.12);
   --skipped-bg: rgba(100, 116, 139, 0.12);
+  --missed: #f97316;
+  --missed-bg: rgba(249, 115, 22, 0.12);
 }
 
 [data-theme='light'] {
@@ -45,6 +47,8 @@
   --failure-bg: rgba(220, 38, 38, 0.1);
   --warning-bg: rgba(217, 119, 6, 0.1);
   --skipped-bg: rgba(100, 116, 139, 0.1);
+  --missed: #ea580c;
+  --missed-bg: rgba(234, 88, 12, 0.1);
 }
 
 * {

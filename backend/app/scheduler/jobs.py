@@ -103,3 +103,10 @@ async def retention_purge_job() -> None:
         total_deleted,
         retention_days,
     )
+
+
+async def overdue_scan_job() -> None:
+    from app.services.overdue import OverdueDetectionService
+    async with async_session() as db:
+        await OverdueDetectionService(db).scan_all()
+    logger.info("overdue_scan_job: scan complete")

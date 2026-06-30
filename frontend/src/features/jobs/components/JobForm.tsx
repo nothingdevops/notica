@@ -32,7 +32,7 @@ export function JobForm({ onSubmit, onCancel, isPending }: JobFormProps) {
   const [description,   setDescription]   = useState('')
   const [expectedCron,  setExpectedCron]  = useState('')
   const [gracePeriod,   setGracePeriod]   = useState(30)
-  const [immediateOn,   setImmediateOn]   = useState<string[]>([])
+  const [immediateOn,   setImmediateOn]   = useState<string[]>(['failure', 'missed'])
   const [immediateContacts, setImmediateContacts] = useState<string[]>([])
   const [selectedEnv,     setSelectedEnv]     = useState<string | null>(null)
   const [selectedService, setSelectedService] = useState<string | null>(null)

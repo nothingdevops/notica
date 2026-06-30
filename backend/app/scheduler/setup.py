@@ -4,6 +4,7 @@ import uuid
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 
 from app.db.models.schedules import Schedule
 from app.db.session import async_session
@@ -46,6 +47,16 @@ async def start_scheduler() -> AsyncIOScheduler:
         replace_existing=True,
     )
     logger.info("Registered retention purge job (daily 02:00 UTC)")
+
+    from app.scheduler.jobs import overdue_scan_job
+    _overdue_interval = int(stored.get("overdue_scan_interval") or 1)
+    _scheduler.add_job(
+        overdue_scan_job,
+        IntervalTrigger(minutes=_overdue_interval),
+        id="overdue_scan",
+        replace_existing=True,
+    )
+    logger.info("Registered overdue scan job (every %d minute(s))", _overdue_interval)
 
     return _scheduler
 
@@ -96,3 +107,14 @@ def sync_schedule_job(schedule: Schedule) -> None:
     remove_schedule_job(schedule.id)
     if schedule.active:
         _register_job(schedule)
+
+
+def sync_overdue_scan_job(interval_minutes: int) -> None:
+    from app.scheduler.jobs import overdue_scan_job as _job
+    _scheduler.add_job(
+        _job,
+        IntervalTrigger(minutes=interval_minutes),
+        id="overdue_scan",
+        replace_existing=True,
+    )
+    logger.info("overdue_scan re-registered: interval=%dm", interval_minutes)

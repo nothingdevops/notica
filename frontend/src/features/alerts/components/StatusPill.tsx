@@ -5,6 +5,7 @@ const LABELS: Record<string, string> = {
   failure: 'failure',
   warning: 'warning',
   skipped: 'skipped',
+  missed:  'missed',
 }
 
 interface StatusPillProps {

@@ -10,6 +10,7 @@ class SettingsUpdate(BaseModel):
     app_url: Optional[str] = None
     display_timezone: Optional[str] = None
     organization_name: Optional[str] = None
+    overdue_scan_interval: Optional[int] = None
 
     @field_validator("retention_days")
     @classmethod
@@ -41,11 +42,21 @@ class SettingsUpdate(BaseModel):
             raise ValueError(f"Invalid IANA timezone: {v}")
         return v
 
+    @field_validator("overdue_scan_interval")
+    @classmethod
+    def validate_interval(cls, v: Optional[int]) -> Optional[int]:
+        if v is None:
+            return v
+        if not (1 <= v <= 60):
+            raise ValueError("overdue_scan_interval must be between 1 and 60")
+        return v
+
 
 class SettingsResponse(BaseModel):
     retention_days: int
     app_url: str
     display_timezone: str
     organization_name: str
+    overdue_scan_interval: int
     has_logo: bool = False
     has_favicon: bool = False

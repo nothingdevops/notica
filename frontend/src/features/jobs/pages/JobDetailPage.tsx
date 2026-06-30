@@ -16,6 +16,7 @@ import type { JobUpdate } from '../types'
 const IMMEDIATE_OPTIONS = [
   { value: 'failure', label: 'failure' },
   { value: 'warning', label: 'warning' },
+  { value: 'missed', label: 'missed' },
   { value: 'success', label: 'success' },
   { value: 'skipped', label: 'skipped' },
 ]

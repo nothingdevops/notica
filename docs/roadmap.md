@@ -3,8 +3,8 @@
 Danh sách tính năng tiềm năng để phát triển thêm, hướng tới open-source cho cộng đồng.
 Đây là tài liệu thảo luận — chưa phải kế hoạch triển khai.
 
-**Trạng thái hiện tại (Phase 1–6 ✅, v0.2.0 ✅, C1 ✅):**
-Job Registry · Alert Ingestion API · Dashboard (Job Board + Alert History + Log Viewer) · Immediate Notification (Teams) · Digest Mode · Settings (retention/timezone/app_url/org_name/logo/favicon) · SSO Keycloak · Branding (logo/favicon) · Digest cursor model · Timezone-aware overdue detection · Analytics Dashboard · Delete Job · Dark mode redesign (Deep Zinc palette)
+**Trạng thái hiện tại (Phase 1–6 ✅, v0.2.0 ✅, C1 ✅, A1 ✅):**
+Job Registry · Alert Ingestion API · Dashboard (Job Board + Alert History + Log Viewer) · Immediate Notification (Teams) · Digest Mode · Settings (retention/timezone/app_url/org_name/logo/favicon/overdue_scan_interval) · SSO Keycloak · Branding (logo/favicon) · Digest cursor model · Timezone-aware overdue detection · Analytics Dashboard · Delete Job · Dark mode redesign (Deep Zinc palette) · **Overdue Detection** (missed alert + notification khi job im lặng)
 
 ---
 
@@ -12,18 +12,60 @@ Job Registry · Alert Ingestion API · Dashboard (Job Board + Alert History + Lo
 
 > Những thứ một backup monitoring system đúng nghĩa bắt buộc phải có.
 
-### A1 · Overdue Detection ⭐
+### A1 · Overdue Detection ✅
 
-Job có `expected_cron` + `grace_period` nhưng nếu script **im lặng hoàn toàn** (server reboot, script crash trước khi gửi report, network đứt) → Notica không biết và không báo gì. Cần APScheduler check định kỳ, tự tạo alert `missed` nếu job không report đúng hạn.
+Job có `expected_cron` + `grace_period` nhưng nếu script **im lặng hoàn toàn** (server reboot, script crash trước khi gửi report, network đứt) → Notica không biết và không báo gì.
 
 **Use-case:**
-> Server backup lúc 02:00 bị reboot đột ngột do kernel panic. Script backup chưa kịp chạy, không có gì gửi về Notica. Sáng ra team không biết đêm qua backup chưa chạy — cho đến khi cần restore thì mới phát hiện không có backup. Với Overdue Detection, Notica tự phát hiện lúc 02:30 (02:00 + 30 phút grace) và ping Teams ngay.
+> Server backup lúc 02:00 bị reboot đột ngột do kernel panic. Script chưa kịp chạy, không có gì gửi về Notica. Với Overdue Detection, Notica tự phát hiện lúc 02:30 (02:00 + 30 phút grace) và ping Teams ngay.
 
-**Cần thêm:**
-- Scheduler chạy mỗi phút, scan toàn bộ active jobs có `expected_cron`
-- Tính `next_expected = last_alert_time + cron_interval + grace_period`
-- Nếu `now > next_expected` → tạo alert `missed` + fire notification
-- UI: Job Board hiển thị badge "OVERDUE" trên job card
+**Thuật toán phát hiện (per active job có `expected_cron`):**
+```
+base         = last_non_missed_alert.completion_time  (hoặc job.created_at nếu chưa có alert)
+base_local   = base.astimezone(display_timezone)
+next_expected = croniter(expected_cron, base_local).get_next()
+deadline     = next_expected + timedelta(minutes=grace_period)
+
+Guard 1: now < deadline           → skip (chưa đến hạn)
+Guard 2: last_missed.time > base  → skip (đã tạo missed cho downtime này rồi — dedup)
+
+→ AlertRepository.create(status="missed", completion_time=now, duration_sec=None)
+→ nếu "missed" in job.immediate_on AND job.immediate_contacts → asyncio.create_task(dispatch_immediate)
+```
+
+**Bất biến dedup:** `base` anchor = lần report thực tế gần nhất. Sau khi tạo 1 missed alert, mọi scan tiếp theo đều bị Guard 2 chặn. Cycle reset khi job report trở lại (base mới).
+
+**Ví dụ `* * * * *`, grace 30 phút, last report 02:00:**
+- 02:01–02:30 → deadline=02:31, Guard 1 chặn
+- 02:31 → tạo missed ✅
+- 02:32–N → Guard 2 chặn (missed.time > base=02:00)
+- Job report lại lúc 10:00 → base reset, cycle mới bắt đầu
+
+**Backend — files thay đổi:**
+- `services/overdue.py` — `OverdueDetectionService.scan_all()` + `_check_job()`; load `display_timezone` từ `SettingsRepository` mỗi lần scan
+- `repositories/alerts.py` — thêm `get_last_non_missed(job_id)` + `get_last_missed(job_id)`
+- `scheduler/jobs.py` — thêm `overdue_scan_job()` async function
+- `scheduler/setup.py` — đăng ký `IntervalTrigger(minutes=N)` khi start; export `sync_overdue_scan_job(N)` để re-register động khi settings đổi
+- `schemas/jobs.py` — `"missed"` thêm vào validator `immediate_on`; default mới cho job: `["failure", "missed"]`
+- `schemas/settings.py` — field `overdue_scan_interval: int` (1–60, default 1)
+- `api/v1/routes/settings.py` — lưu `overdue_scan_interval` + gọi `sync_overdue_scan_job()` ngay khi save
+
+**Frontend — files thay đổi:**
+- `index.css` — `--missed: #f97316` (dark) / `#ea580c` (light); `--missed-bg` tương ứng
+- `components/ui/badge.tsx` — extend `Status` type với `'missed'`; thêm `missed` vào `statusStyles`
+- `features/alerts/components/StatusPill.tsx` — label `missed: 'missed'`
+- `features/jobs/components/JobCard.tsx` — `STATUS_DOT_COLOR.missed = '#f97316'` (hex literal, không dùng CSS var vì SVG)
+- `features/jobs/pages/JobDetailPage.tsx` — thêm `{ value: 'missed', label: 'missed' }` vào `IMMEDIATE_OPTIONS`
+- `features/jobs/components/JobForm.tsx` — default `immediateOn = ['failure', 'missed']`
+- `features/settings/types.ts` — thêm `overdue_scan_interval` vào `Settings` và `SettingsUpdate`
+- `features/settings/pages/SettingsPage.tsx` — number input 1–60 cho interval, dirty tracking, reset on discard
+
+**Quyết định thiết kế:**
+- Dùng `IntervalTrigger` (không phải `CronTrigger`) — đơn giản hơn cho interval đều đặn, tránh phức tạp timezone
+- `"missed"` thêm vào `immediate_on` (không tạo field riêng) — UX nhất quán với failure/warning
+- Notification dùng `asyncio.create_task` (fire-and-forget) — giống pattern `AlertService.ingest`
+- `sync_overdue_scan_job` dùng `replace_existing=True` — đổi interval có hiệu lực ngay, không cần restart
+- Không cần Alembic migration — cột `status` là `VARCHAR(20)`, `"missed"` vừa đủ
 
 ---
 

@@ -68,10 +68,12 @@ export function SettingsPage() {
   const [appUrl, setAppUrl] = useState<string>('')
   const [displayTimezone, setDisplayTimezone] = useState<string>('Asia/Ho_Chi_Minh')
   const [orgName, setOrgName] = useState<string>('Notica')
+  const [overdueInterval, setOverdueInterval] = useState<number>(1)
   const [initialRetention, setInitialRetention] = useState<number>(90)
   const [initialAppUrl, setInitialAppUrl] = useState<string>('')
   const [initialTimezone, setInitialTimezone] = useState<string>('Asia/Ho_Chi_Minh')
   const [initialOrgName, setInitialOrgName] = useState<string>('Notica')
+  const [initialOverdueInterval, setInitialOverdueInterval] = useState<number>(1)
 
   useEffect(() => {
     if (settings) {
@@ -79,14 +81,16 @@ export function SettingsPage() {
       setAppUrl(settings.app_url)
       setDisplayTimezone(settings.display_timezone)
       setOrgName(settings.organization_name)
+      setOverdueInterval(settings.overdue_scan_interval)
       setInitialRetention(settings.retention_days)
       setInitialAppUrl(settings.app_url)
       setInitialTimezone(settings.display_timezone)
       setInitialOrgName(settings.organization_name)
+      setInitialOverdueInterval(settings.overdue_scan_interval)
     }
   }, [settings])
 
-  const isDirty = retentionDays !== initialRetention || appUrl !== initialAppUrl || displayTimezone !== initialTimezone || orgName !== initialOrgName
+  const isDirty = retentionDays !== initialRetention || appUrl !== initialAppUrl || displayTimezone !== initialTimezone || orgName !== initialOrgName || overdueInterval !== initialOverdueInterval
   const retentionValid = retentionDays >= 1 && retentionDays <= 3650
   const urlValid = appUrl.startsWith('http://') || appUrl.startsWith('https://')
   const canSave = isDirty && retentionValid && urlValid
@@ -97,12 +101,14 @@ export function SettingsPage() {
     if (appUrl !== initialAppUrl) update.app_url = appUrl
     if (displayTimezone !== initialTimezone) update.display_timezone = displayTimezone
     if (orgName !== initialOrgName) update.organization_name = orgName
+    if (overdueInterval !== initialOverdueInterval) update.overdue_scan_interval = overdueInterval
     updateSettings.mutate(update, {
       onSuccess: () => {
         setInitialRetention(retentionDays)
         setInitialAppUrl(appUrl)
         setInitialTimezone(displayTimezone)
         setInitialOrgName(orgName)
+        setInitialOverdueInterval(overdueInterval)
         toast('Settings saved', 'success')
       },
       onError: () => toast('Failed to save settings', 'error'),
@@ -293,6 +299,29 @@ export function SettingsPage() {
 
           <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
             <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
+              Operations
+            </h2>
+            <p className="mb-4 text-[11px] text-[var(--text-3)]">
+              Configure operational parameters for job monitoring and health checks.
+            </p>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs text-[var(--text-2)]">Overdue scan interval (phút)</span>
+              <Input
+                type="number"
+                min={1}
+                max={60}
+                value={overdueInterval}
+                onChange={e => setOverdueInterval(Number(e.target.value))}
+                className="w-28"
+              />
+              <span className="text-[11px] text-[var(--text-3)]">
+                Tần suất kiểm tra job overdue. Mặc định 1 phút. Thay đổi có hiệu lực ngay.
+              </span>
+            </label>
+          </section>
+
+          <section className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] p-5">
+            <h2 className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--text-2)]">
               Application
             </h2>
             <p className="mb-4 text-[11px] text-[var(--text-3)]">
@@ -323,6 +352,7 @@ export function SettingsPage() {
                   setAppUrl(initialAppUrl)
                   setDisplayTimezone(initialTimezone)
                   setOrgName(initialOrgName)
+                  setOverdueInterval(initialOverdueInterval)
                 }}
               >
                 Discard

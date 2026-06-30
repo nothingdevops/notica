@@ -5,6 +5,7 @@ export interface Settings {
   organization_name: string
   has_logo: boolean
   has_favicon: boolean
+  overdue_scan_interval: number
 }
 
 export interface SettingsUpdate {
@@ -12,4 +13,5 @@ export interface SettingsUpdate {
   app_url?: string
   display_timezone?: string
   organization_name?: string
+  overdue_scan_interval?: number
 }

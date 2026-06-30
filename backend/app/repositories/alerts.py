@@ -95,6 +95,26 @@ class AlertRepository:
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
 
+    async def get_last_non_missed(self, job_id: uuid.UUID) -> Optional[Alert]:
+        """Get the most recent alert with status != 'missed' for a job."""
+        result = await self.db.execute(
+            select(Alert)
+            .where(Alert.job_id == job_id, Alert.status != "missed")
+            .order_by(Alert.completion_time.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_last_missed(self, job_id: uuid.UUID) -> Optional[Alert]:
+        """Get the most recent alert with status == 'missed' for a job."""
+        result = await self.db.execute(
+            select(Alert)
+            .where(Alert.job_id == job_id, Alert.status == "missed")
+            .order_by(Alert.completion_time.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
     def _apply_filters(self, stmt, job_id, status, tags, date_from, date_to):
         if job_id:
             stmt = stmt.where(Alert.job_id == job_id)

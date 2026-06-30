@@ -20,7 +20,7 @@ class JobCreate(BaseModel):
     expected_cron: Optional[str] = None
     grace_period: int = 30
     tags: dict = {}
-    immediate_on: List[str] = []
+    immediate_on: List[str] = ["failure", "missed"]
     immediate_contacts: List[uuid.UUID] = []
 
     @field_validator("expected_cron")
@@ -31,7 +31,7 @@ class JobCreate(BaseModel):
     @field_validator("immediate_on")
     @classmethod
     def validate_statuses(cls, v: List[str]) -> List[str]:
-        valid = {"success", "failure", "warning", "skipped"}
+        valid = {"success", "failure", "warning", "skipped", "missed"}
         for s in v:
             if s not in valid:
                 raise ValueError(f"Invalid status '{s}'. Must be one of {valid}")
@@ -58,7 +58,7 @@ class JobUpdate(BaseModel):
     def validate_statuses(cls, v: Optional[List[str]]) -> Optional[List[str]]:
         if v is None:
             return v
-        valid = {"success", "failure", "warning", "skipped"}
+        valid = {"success", "failure", "warning", "skipped", "missed"}
         for s in v:
             if s not in valid:
                 raise ValueError(f"Invalid status '{s}'. Must be one of {valid}")

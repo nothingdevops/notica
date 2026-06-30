@@ -16,6 +16,7 @@ DEFAULTS = {
     "app_url": config.app_url,
     "display_timezone": "Asia/Ho_Chi_Minh",
     "organization_name": "Notica",
+    "overdue_scan_interval": 1,
 }
 
 
@@ -26,6 +27,7 @@ async def _load(db: AsyncSession) -> SettingsResponse:
         app_url=str(stored.get("app_url", DEFAULTS["app_url"])),
         display_timezone=str(stored.get("display_timezone", DEFAULTS["display_timezone"])),
         organization_name=str(stored.get("organization_name", DEFAULTS["organization_name"])),
+        overdue_scan_interval=int(stored.get("overdue_scan_interval", DEFAULTS["overdue_scan_interval"])),
         has_logo=bool(stored.get("logo_data")),
         has_favicon=bool(stored.get("favicon_data")),
     )
@@ -54,4 +56,8 @@ async def update_settings(
         await repo.set("display_timezone", data.display_timezone)
     if data.organization_name is not None:
         await repo.set("organization_name", data.organization_name)
+    if data.overdue_scan_interval is not None:
+        await repo.set("overdue_scan_interval", data.overdue_scan_interval)
+        from app.scheduler.setup import sync_overdue_scan_job
+        sync_overdue_scan_job(data.overdue_scan_interval)
     return await _load(db)

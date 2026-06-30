@@ -8,6 +8,7 @@ const STATUS_DOT_COLOR: Record<string, string> = {
   failure: 'var(--failure)',
   warning: 'var(--warning)',
   skipped: 'var(--skipped)',
+  missed:  '#f97316',
 }
 
 interface JobCardProps {
