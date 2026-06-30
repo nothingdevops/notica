@@ -9,6 +9,25 @@ Hướng dẫn nâng cấp giữa các version. Mỗi entry liệt kê rõ: có 
 
 ---
 
+## v2.0.12 — Logo clickable → trang chủ
+
+**Từ v2.0.11 → v2.0.12**
+
+### Migration DB
+**Không cần.** Thay đổi frontend only.
+
+### Hành động khi upgrade
+```bash
+git pull
+docker compose up -d
+```
+
+### Thay đổi
+- Logo và tên org trên Sidebar giờ là link clickable về trang chủ (`/`)
+- Version string trong Sidebar cập nhật lên `v2.0.12`
+
+---
+
 ## v2.0.11 — A1 Overdue Detection
 
 **Từ v2.0.10 → v2.0.11**

@@ -3,7 +3,7 @@
 Danh sách tính năng tiềm năng để phát triển thêm, hướng tới open-source cho cộng đồng.
 Đây là tài liệu thảo luận — chưa phải kế hoạch triển khai.
 
-**Trạng thái hiện tại (Phase 1–6 ✅, v0.2.0 ✅, C1 ✅, A1 ✅):**
+**Trạng thái hiện tại (Phase 1–6 ✅, v0.2.0 ✅, C1 ✅, A1 ✅, v2.0.12 ✅):**
 Job Registry · Alert Ingestion API · Dashboard (Job Board + Alert History + Log Viewer) · Immediate Notification (Teams) · Digest Mode · Settings (retention/timezone/app_url/org_name/logo/favicon/overdue_scan_interval) · SSO Keycloak · Branding (logo/favicon) · Digest cursor model · Timezone-aware overdue detection · Analytics Dashboard · Delete Job · Dark mode redesign (Deep Zinc palette) · **Overdue Detection** (missed alert + notification khi job im lặng)
 
 ---

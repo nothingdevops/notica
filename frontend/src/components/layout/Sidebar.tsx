@@ -31,7 +31,7 @@ export function Sidebar() {
   return (
     <aside className="flex w-[188px] min-w-[188px] flex-col border-r border-[var(--border)] bg-[var(--bg-card)]">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 border-b border-[var(--border-sub)] px-4 py-3.5">
+      <NavLink to="/" className="flex items-center gap-2.5 border-b border-[var(--border-sub)] px-4 py-3.5 hover:bg-[var(--bg-elevated)] transition-colors">
         {hasLogo ? (
           <img
             src="/api/v1/assets/logo"
@@ -45,9 +45,9 @@ export function Sidebar() {
         )}
         <div>
           <div className="text-[13px] font-semibold text-[var(--text-1)]">{orgName}</div>
-          <div className="font-mono text-[9px] text-[var(--text-3)]">v0.1.0</div>
+          <div className="font-mono text-[9px] text-[var(--text-3)]">v2.0.12</div>
         </div>
-      </div>
+      </NavLink>
 
       {/* Nav */}
       <nav className="flex flex-1 flex-col gap-px py-2">

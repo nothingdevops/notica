@@ -209,7 +209,7 @@ POST /api/v1/alerts
 
 | Field | Type | Bắt buộc | Mô tả |
 |---|---|---|---|
-| `status` | string | ✅ | `success` / `failure` / `warning` / `skipped` |
+| `status` | string | ✅ | `success` / `failure` / `warning` / `skipped` (script tự gửi; `missed` do Notica tự tạo khi job im lặng) |
 | `completion_time` | ISO 8601 | ✅ | Thời điểm backup kết thúc — **phải có timezone offset** |
 | `duration_sec` | integer | ❌ | Thời gian chạy tính bằng giây |
 | `description` | string | ❌ | Tóm tắt ngắn, hiển thị trên Teams card |

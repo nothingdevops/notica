@@ -18,7 +18,8 @@ Backup Scripts (bash / python / ansible / cron)
 │  │  Ingestion API  │  │    Web API      │  │ Scheduler │ │
 │  │  POST /alerts   │  │  Jobs CRUD      │  │ APSched   │ │
 │  │  Validate       │  │  Alerts query   │  │ Digest    │ │
-│  │  Store + Notify │  │  Schedules CRUD │  │ Retention │ │
+│  │  Store + Notify │  │  Schedules CRUD │  │ Overdue   │ │
+│  │                 │  │  Contacts CRUD  │  │ Retention │ │
 │  └────────┬────────┘  │  Contacts CRUD  │  └─────┬─────┘ │
 │           │           └────────┬────────┘        │       │
 │           └──────────┬─────────┘                 │       │
@@ -82,7 +83,7 @@ token               VARCHAR(64) NOT NULL UNIQUE    -- per-job auth token, plaint
 expected_cron       VARCHAR(100)                   -- cron expression để detect overdue
 grace_period        INTEGER DEFAULT 30             -- phút, sau cron fire mới tính overdue
 tags                JSONB DEFAULT '{}'             -- predefined: {"env":"prod|dev|dr|other","service":"db|app|service|other"}; set/edit via UI
-immediate_on        VARCHAR[] DEFAULT '{}'         -- statuses trigger immediate: ['failure','warning']
+immediate_on        VARCHAR[] DEFAULT '{}'         -- statuses trigger immediate: ['failure','missed'] (default cho job mới qua API)
 immediate_contacts  UUID[] DEFAULT '{}'            -- contact IDs nhận immediate alert
 active              BOOLEAN DEFAULT true
 created_at          TIMESTAMPTZ DEFAULT now()
@@ -94,7 +95,7 @@ updated_at          TIMESTAMPTZ DEFAULT now()
 id              UUID PRIMARY KEY
 job_id          UUID REFERENCES jobs(id) ON DELETE CASCADE
 job_name        VARCHAR(255) NOT NULL       -- denormalized để query nhanh
-status          VARCHAR(20) NOT NULL        -- success | failure | warning | skipped
+status          VARCHAR(20) NOT NULL        -- success | failure | warning | skipped | missed
 completion_time TIMESTAMPTZ NOT NULL        -- thời điểm backup xong (từ script)
 duration_sec    INTEGER                     -- tính từ script, optional
 description     TEXT                        -- mô tả ngắn của run này
@@ -156,6 +157,7 @@ value JSONB NOT NULL
 | `logo_mime` | MIME type của logo (`image/png`, `image/jpeg`, `image/svg+xml`) | — |
 | `favicon_data` | Favicon image encode base64 | — |
 | `favicon_mime` | MIME type của favicon | — |
+| `overdue_scan_interval` | Tần suất scan overdue (phút). Thay đổi có hiệu lực ngay, không cần restart | `1` |
 
 ---
 
@@ -215,7 +217,8 @@ POST   /api/v1/contacts/{id}/test    -- gửi test message
 ### Settings
 ```
 GET /api/v1/settings     -- trả về: retention_days, app_url, display_timezone,
-                         --         organization_name, has_logo, has_favicon
+                         --         organization_name, has_logo, has_favicon,
+                         --         overdue_scan_interval
 PUT /api/v1/settings     -- update bất kỳ field nào (patch semantics)
 ```
 
@@ -243,7 +246,7 @@ GET /api/v1/analytics/jobs/{job_id}?period=7   -- per-job: success rate, daily s
 
 ### Immediate Mode
 Config nằm trên từng **job** (không phải schedule). Mỗi job có:
-- `immediate_on`: danh sách status trigger immediate (vd: `['failure', 'warning']`)
+- `immediate_on`: danh sách status trigger immediate (vd: `['failure', 'missed']`)
 - `immediate_contacts`: danh sách contact IDs nhận immediate alert
 
 Flow khi alert đến:
@@ -297,7 +300,6 @@ frontend/src/
     ui/             # shadcn primitives
   lib/
     api.ts          # fetch wrapper: get/post/put/delete/upload(multipart)
-    api.ts          # fetch wrapper
     queryKeys.ts    # typed query keys cho TanStack Query
     queryClient.ts
   hooks/
@@ -311,11 +313,9 @@ frontend/src/
 |---|---|---|
 | Job Board | `/` | Summary bar (pass/fail/overdue) + mini job cards với 7-run history strip |
 | Alert History | `/alerts` | Table với date range + status + tag filter, sort, pagination. Row expand → log drawer |
-| Job Detail | `/jobs/{id}` | Config job, xem token, nút Regenerate Token, immediate_on config |
+| Job Detail | `/jobs/{id}` | Config job, xem token, nút Regenerate Token, immediate_on config (failure/warning/missed/success/skipped toggle), per-job analytics panel, Danger Zone (delete) |
 | Schedules | `/schedules` | CRUD digest schedule, cron input với cronstrue preview, timezone label, Run Now button |
 | Analytics | `/analytics` | KPI strip + Health by Environment cards + Problem Jobs table + charts; period 7d/30d/90d |
-| Job Detail | `/jobs/{id}` | Config job, xem token, nút Regenerate Token, immediate_on config, per-job analytics panel |
-| Schedules | `/schedules` | CRUD digest schedule, cron input với cronstrue preview, manual trigger |
 | Contacts | `/contacts` | CRUD contacts, "Test" button per contact |
 | Settings | `/settings` | Branding (org name, logo, favicon), timezone, retention, app URL |
 
@@ -374,7 +374,6 @@ Access log của nginx cũng dạng JSON, bao gồm `upstream_response_time` và
 - **Slack adapter** — Slack Incoming Webhook
 - **Alert rules engine** — escalation nếu job fail N lần liên tiếp
 - **Silence windows** — không alert trong giờ maintenance
-- **Overdue Detection** — auto tạo alert `missed` khi job im lặng quá grace period
 - **Multi-tenant** — nhiều team dùng chung, isolated data per team
 
 ---
@@ -391,3 +390,6 @@ Access log của nginx cũng dạng JSON, bao gồm `upstream_response_time` và
 | 6 | SSO Keycloak (hybrid auth), structured logging, ErrorBoundary | Open-source ready |
 | 0.2.0 | Timezone fix (overdue + APScheduler), digest cursor model, org name, assets API, branding UI | Production bugs fixed + branding |
 | C1 | Analytics Dashboard (`/analytics` + JobStatsPanel) | Visibility — success rate, env health, problem jobs, charts 7/30/90d |
+| 2.0.10 | Delete Job (Danger Zone + confirm dialog), Analytics redesign, Dark mode Deep Zinc C palette | UX polish + dark mode |
+| 2.0.11 | A1 Overdue Detection — missed alert + notification khi job im lặng, overdue_scan_interval setting | Proactive monitoring |
+| 2.0.12 | Logo/org name Sidebar clickable → trang chủ | UX |
