@@ -51,7 +51,7 @@ Dán hàm `notica_report` vào đầu script. Hàm này **không throw, không e
 #!/bin/bash
 
 # ── Notica reporter (copy-paste, không sửa) ───────────────────────────────────
-NOTICA_URL="http://notica.internal"
+NOTICA_URL="https://notica.internal"
 NOTICA_TOKEN="your-job-token-here"
 
 notica_report() {
