@@ -9,6 +9,37 @@ Hướng dẫn nâng cấp giữa các version. Mỗi entry liệt kê rõ: có 
 
 ---
 
+## v2.0.13 — Backfill missed vào existing jobs
+
+**Từ v2.0.12 → v2.0.13**
+
+### Migration DB
+**Cần chạy Alembic.** Migration `20260630000000` backfill `missed` vào `immediate_on` cho tất cả jobs đã opt-in immediate alerts.
+
+```bash
+# Docker Compose — entrypoint tự chạy khi restart:
+docker compose up -d
+
+# Thủ công:
+cd backend && alembic upgrade head
+```
+
+### Hành động khi upgrade
+```bash
+git pull
+docker compose up -d
+```
+
+### Thay đổi hành vi
+- **Jobs có `immediate_on` non-empty** (vd: `{failure}`) sẽ được tự động add `missed` → `{failure, missed}` sau migration. Những jobs này sẽ bắt đầu nhận Teams notification khi bị overdue.
+- **Jobs có `immediate_on = {}`** (không chọn gì) giữ nguyên — không bị ảnh hưởng.
+- Nếu không muốn nhận overdue alert cho job nào cụ thể, vào Job Detail → bỏ toggle `missed`.
+
+### Tại sao cần migration này
+Jobs tạo trước A1 (overdue detection) chỉ có `failure` trong `immediate_on` vì `missed` chưa tồn tại. Sau khi upgrade lên A1, nếu backend restart và overdue scan phát hiện job im lặng, notification sẽ bị skip vì `"missed" not in immediate_on`. Migration này fix upgrade path đó.
+
+---
+
 ## v2.0.12 — Logo clickable → trang chủ
 
 **Từ v2.0.11 → v2.0.12**

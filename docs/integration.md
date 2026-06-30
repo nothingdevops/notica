@@ -34,7 +34,7 @@ Vào **Job Board → Add job**, điền:
 | **Grace period** | Thời gian cho phép trễ (phút) trước khi đánh dấu overdue |
 | **Environment** | Tag môi trường: `prod`, `dev`, `dr`, `other` |
 | **Service** | Tag loại service: `db`, `app`, `service`, `other` |
-| **Immediate alerts** | Status nào fire Teams ngay (thường chọn `failure`) |
+| **Immediate alerts** | Status nào fire Teams ngay. Mặc định mới: `failure` + `missed` — xem [Overdue Detection](#overdue-detection) bên dưới |
 | **Notify contacts** | Teams webhook contact nhận alert |
 
 Sau khi tạo, copy **Job Token** ở trang Job Detail.
@@ -257,6 +257,42 @@ completion_time: "{{ ansible_date_time.iso8601 }}"  # 2026-06-28T09:15:53Z  ✅
 | `201` | Alert đã nhận |
 | `401` | Token sai hoặc job bị deactivate |
 | `422` | `status` không hợp lệ hoặc thiếu `completion_time` |
+
+---
+
+## Overdue Detection
+
+Notica tự động tạo alert `missed` khi job im lặng quá deadline — **script không cần làm gì thêm**.
+
+```
+last report (hoặc job creation)
+        ↓
+next expected run  =  croniter(expected_cron, last_report).get_next()
+        ↓
+deadline           =  next_expected + grace_period
+        ↓  (nếu không có report nào trước deadline)
+Notica tự tạo alert "missed" + fire Teams nếu opt-in
+```
+
+**Ví dụ:** Job cron `0 3 * * *`, grace 30 phút → nếu không có report nào trước 03:30, Notica tạo alert `missed`.
+
+### Khi nào dùng `skipped`
+
+Gửi `skipped` khi job **chạy nhưng cố ý bỏ qua** (maintenance window, điều kiện không đủ, v.v.). Điều này reset timer overdue — Notica hiểu job vẫn alive.
+
+```bash
+# Maintenance window hôm nay — báo Notica biết để không đánh missed
+if [ "$MAINTENANCE" = "true" ]; then
+  notica_report "skipped" "Maintenance window" "0"
+  exit 0
+fi
+```
+
+**Không gửi gì cả** → Notica sẽ đánh `missed` sau deadline. Dùng khi job thực sự bị crash hoặc không chạy được.
+
+### Jobs cũ khi upgrade lên A1
+
+Jobs tạo trước A1 chỉ có `failure` trong `immediate_on` — migration `20260630000000` tự động backfill `missed` khi upgrade. Nếu không muốn nhận overdue alert cho job nào, vào Job Detail bỏ toggle `missed`.
 
 ---
 
